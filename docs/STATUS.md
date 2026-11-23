@@ -24,13 +24,18 @@ uyarısız derleniyor. Gerçek cihazda (Android cihaz/emülatör) test reklamlar
 ## Faz 3a — UI framework ✅ (doğrulandı)
 Detay: [UI_FRAMEWORK.md](UI_FRAMEWORK.md). `NavigationService` (ekran/popup yığını, popup kuyruğu, geri tuşu, serileştirme),
 `PlayerSettingsService`, 8 dilde `CoreStrings`, `UIView`/`UIManager`, `ConfirmPopup`, `SettingsView`, `LocalizedText`,
-`CurrencyDisplay`, `NOVAFORGE ▸ UI` editor menüsü. Testler: EditMode 117/117, PlayMode 5/5 (Unity 6000.3.29f1), dotnet 117/117.
+`CurrencyDisplay`, `NOVAFORGE ▸ UI` editor menüsü.
+
+## Faz 3b — Hazır ekranlar + ses ✅ (doğrulandı)
+`LevelResultView`, `DailyRewardView`, `ShopView`, `UIButtonFeedback`, `AudioService` (crossfade, SFX havuzu, reklam sırasında susma), `Haptics`.
+Testler: EditMode 118/118, PlayMode 8/8, dotnet 118/118. Android + iOS **player script derlemesi** temiz (AdMob dahil).
+Cihazda henüz çalıştırılmadı: titreşim, gerçek reklam, gerçek ses çıkışı.
 
 ## Sıradaki fazlar (yapılmadı)
 | Faz | İçerik | Ön koşul |
 |---|---|---|
 | 2 | ✅ Sandbox projesi, Core testleri Unity'de, Unity köprüsü + AdMob derlemesi | — |
-| 3 | ✅ UI framework çekirdeği. Kalan: hazır shop/günlük ödül/kazan-kaybet ekranları, tema; Audio (pooling, mixer), Input (tap/swipe/drag/long-press), Scene transitions, Addressables | Faz 2 |
+| 3 | ✅ UI + hazır ekranlar + ses. Kalan: tema, (pooling, mixer), Input (tap/swipe/drag/long-press), Scene transitions, Addressables | Faz 2 |
 | 4 | SDK adaptörleri: Unity IAP 5.x, AdMob cihaz testi, Firebase Analytics/Remote Config/Crashlytics, Google UMP + iOS ATT | Faz 2 + hesaplar |
 | 5 | Editor araçları: NOVAFORGE menüsü, Create New Game, validators (config/monetization/localization), Level Editor, build config | Faz 3 |
 | 6 | Oyun şablonları (Puzzle, Arcade, Hypercasual, Idle, Simulation) | Faz 3-5 |

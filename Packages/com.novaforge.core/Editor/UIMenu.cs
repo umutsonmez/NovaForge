@@ -166,6 +166,197 @@ namespace NovaForge.Editor
             Select(view);
         }
 
+        [MenuItem(Root + "Create Level Result Popup", priority = 42)]
+        public static void CreateLevelResultPopup()
+        {
+            var view = CreateView<LevelResultView>("LevelResultPopup", UIViewKind.Popup, ViewIds.LevelResult);
+            var panel = CreatePanel(view.transform, new Vector2(880, 1100));
+            var layout = Vertical(panel, 48, 28);
+            var title = Text(layout, "Title", "Level Complete!", 72, FontStyles.Bold, 120);
+
+            var starRow = new GameObject("Stars", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+            starRow.transform.SetParent(layout, false);
+            starRow.GetComponent<LayoutElement>().preferredHeight = 160;
+            var h = starRow.GetComponent<HorizontalLayoutGroup>();
+            h.childAlignment = TextAnchor.MiddleCenter;
+            h.spacing = 24;
+            h.childControlWidth = h.childControlHeight = false;
+            var stars = new GameObject[3];
+            for (int i = 0; i < 3; i++)
+            {
+                var star = new GameObject("Star" + (i + 1), typeof(RectTransform), typeof(Image));
+                star.transform.SetParent(starRow.transform, false);
+                ((RectTransform)star.transform).sizeDelta = new Vector2(140, 140);
+                star.GetComponent<Image>().color = new Color(1f, 0.8f, 0.2f);
+                stars[i] = star;
+            }
+
+            var reward = Text(layout, "Reward", "+50 coin", 52, FontStyles.Bold, 90);
+            var doubleReward = Button(layout, "DoubleReward", CoreStrings.DoubleReward, out _);
+            var next = Button(layout, "Next", CoreStrings.Next, out _);
+            var retry = Button(layout, "Retry", CoreStrings.Retry, out _);
+            var home = Button(layout, "Home", CoreStrings.Home, out _);
+
+            var so = new SerializedObject(view);
+            so.FindProperty("title").objectReferenceValue = title;
+            var starsProp = so.FindProperty("stars");
+            starsProp.arraySize = 3;
+            for (int i = 0; i < 3; i++) starsProp.GetArrayElementAtIndex(i).objectReferenceValue = stars[i];
+            so.FindProperty("rewardLabel").objectReferenceValue = reward;
+            so.FindProperty("nextButton").objectReferenceValue = next;
+            so.FindProperty("retryButton").objectReferenceValue = retry;
+            so.FindProperty("homeButton").objectReferenceValue = home;
+            so.FindProperty("doubleRewardButton").objectReferenceValue = doubleReward;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            Select(view);
+        }
+
+        [MenuItem(Root + "Create Daily Reward Popup", priority = 43)]
+        public static void CreateDailyRewardPopup()
+        {
+            var view = CreateView<DailyRewardView>("DailyRewardPopup", UIViewKind.Popup, ViewIds.DailyReward);
+            var panel = CreatePanel(view.transform, new Vector2(940, 1300));
+            var layout = Vertical(panel, 40, 24);
+            Localized(Text(layout, "Title", "Daily Reward", 64, FontStyles.Bold, 110), CoreStrings.DailyTitle);
+
+            var grid = new GameObject("Days", typeof(RectTransform), typeof(GridLayoutGroup), typeof(LayoutElement));
+            grid.transform.SetParent(layout, false);
+            grid.GetComponent<LayoutElement>().preferredHeight = 760;
+            var g = grid.GetComponent<GridLayoutGroup>();
+            g.cellSize = new Vector2(250, 240);
+            g.spacing = new Vector2(20, 20);
+            g.childAlignment = TextAnchor.UpperCenter;
+            g.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            g.constraintCount = 3;
+
+            var cells = new DailyRewardDayCell[7];
+            for (int i = 0; i < 7; i++)
+            {
+                var cellGo = new GameObject("Day" + (i + 1), typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup));
+                cellGo.transform.SetParent(grid.transform, false);
+                cellGo.GetComponent<Image>().color = new Color(0.24f, 0.26f, 0.33f);
+                var v = cellGo.GetComponent<VerticalLayoutGroup>();
+                v.childAlignment = TextAnchor.MiddleCenter;
+                v.childControlWidth = v.childControlHeight = true;
+                v.childForceExpandWidth = true;
+                v.padding = new RectOffset(8, 8, 8, 8);
+                var cell = cellGo.AddComponent<DailyRewardDayCell>();
+                cell.dayLabel = Text(cellGo.transform, "Day", "Day " + (i + 1), 34, FontStyles.Bold, 60);
+                cell.rewardLabel = Text(cellGo.transform, "Reward", "50 coin", 32, FontStyles.Normal, 100);
+                cell.claimedMark = Overlay(cellGo.transform, "Claimed", new Color(0.2f, 0.8f, 0.4f, 0.35f));
+                cell.currentHighlight = Overlay(cellGo.transform, "Current", new Color(1f, 0.85f, 0.2f, 0.3f));
+                cells[i] = cell;
+            }
+
+            var claim = Button(layout, "Claim", CoreStrings.DailyClaim, out _);
+            var countdown = Text(layout, "Countdown", "Next reward in 12:00:00", 36, FontStyles.Normal, 60);
+            var close = Button(layout, "Close", CoreStrings.Close, out _);
+
+            var so = new SerializedObject(view);
+            var daysProp = so.FindProperty("days");
+            daysProp.arraySize = cells.Length;
+            for (int i = 0; i < cells.Length; i++) daysProp.GetArrayElementAtIndex(i).objectReferenceValue = cells[i];
+            so.FindProperty("claimButton").objectReferenceValue = claim;
+            so.FindProperty("closeButton").objectReferenceValue = close;
+            so.FindProperty("countdownLabel").objectReferenceValue = countdown;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            Select(view);
+        }
+
+        [MenuItem(Root + "Create Shop Screen", priority = 44)]
+        public static void CreateShopScreen()
+        {
+            var view = CreateView<ShopView>("ShopScreen", UIViewKind.Screen, ViewIds.Shop);
+            var bg = view.gameObject.AddComponent<Image>();
+            bg.color = new Color(0.12f, 0.13f, 0.17f);
+            var layout = Vertical(view.transform, 40, 24);
+            Localized(Text(layout, "Title", "Shop", 72, FontStyles.Bold, 130), CoreStrings.ShopTitle);
+
+            var scrollGo = DefaultControls.CreateScrollView(UiResources());
+            scrollGo.name = "Items";
+            scrollGo.transform.SetParent(layout, false);
+            scrollGo.AddComponent<LayoutElement>().flexibleHeight = 1;
+            var scroll = scrollGo.GetComponent<ScrollRect>();
+            scroll.horizontal = false;
+            var hBar = scroll.horizontalScrollbar;
+            scroll.horizontalScrollbar = null;
+            if (hBar != null) UnityEngine.Object.DestroyImmediate(hBar.gameObject);
+            var content = scroll.content;
+            var cv = content.gameObject.AddComponent<VerticalLayoutGroup>();
+            cv.spacing = 20;
+            cv.padding = new RectOffset(16, 16, 16, 16);
+            cv.childControlWidth = cv.childControlHeight = true;
+            cv.childForceExpandWidth = true;
+            cv.childForceExpandHeight = false;
+            content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var rowGo = new GameObject("ItemTemplate", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+            rowGo.transform.SetParent(content, false);
+            rowGo.GetComponent<Image>().color = new Color(0.2f, 0.22f, 0.28f);
+            rowGo.GetComponent<LayoutElement>().preferredHeight = 200;
+            var rh = rowGo.GetComponent<HorizontalLayoutGroup>();
+            rh.padding = new RectOffset(28, 28, 20, 20);
+            rh.spacing = 20;
+            rh.childAlignment = TextAnchor.MiddleLeft;
+            rh.childControlWidth = rh.childControlHeight = true;
+            rh.childForceExpandWidth = false;
+            rh.childForceExpandHeight = true;
+            var info = new GameObject("Info", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
+            info.transform.SetParent(rowGo.transform, false);
+            info.GetComponent<LayoutElement>().flexibleWidth = 1;
+            var iv = info.GetComponent<VerticalLayoutGroup>();
+            iv.childControlWidth = iv.childControlHeight = true;
+            iv.childForceExpandWidth = true;
+            var item = rowGo.AddComponent<ShopItemView>();
+            item.titleLabel = Text(info.transform, "Title", "Item", 44, FontStyles.Bold, 70);
+            item.titleLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            item.contentLabel = Text(info.transform, "Content", "100 coin", 34, FontStyles.Normal, 60);
+            item.contentLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            item.buyButton = Button(rowGo.transform, "Buy", null, out var priceLabel);
+            item.priceLabel = priceLabel;
+            item.buyButton.GetComponent<LayoutElement>().preferredWidth = 300;
+            priceLabel.text = "$0.99";
+            var owned = Text(rowGo.transform, "Owned", "Owned", 40, FontStyles.Bold, 120);
+            owned.GetComponent<LayoutElement>().preferredWidth = 300;
+            Localized(owned, CoreStrings.ShopOwned);
+            item.ownedMark = owned.gameObject;
+
+            var restore = Button(layout, "Restore", CoreStrings.ShopRestore, out _);
+            var close = Button(layout, "Close", CoreStrings.Close, out _);
+
+            var so = new SerializedObject(view);
+            so.FindProperty("itemTemplate").objectReferenceValue = item;
+            so.FindProperty("itemContainer").objectReferenceValue = content;
+            so.FindProperty("restoreButton").objectReferenceValue = restore;
+            so.FindProperty("closeButton").objectReferenceValue = close;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            Select(view);
+        }
+
+        [MenuItem("NOVAFORGE/Audio/Create Audio Service", priority = 0)]
+        public static void CreateAudioService()
+        {
+            var existing = UnityEngine.Object.FindAnyObjectByType<NovaForge.Unity.Audio.AudioService>(FindObjectsInactive.Include);
+            if (existing != null) { Selection.activeGameObject = existing.gameObject; return; }
+            var app = UnityEngine.Object.FindAnyObjectByType<NovaForgeApp>(FindObjectsInactive.Include);
+            var host = app != null ? app.gameObject : new GameObject("Audio");
+            if (app == null) Undo.RegisterCreatedObjectUndo(host, "Create Audio Service");
+            Undo.AddComponent<NovaForge.Unity.Audio.AudioService>(host);
+            Selection.activeGameObject = host;
+        }
+
+        private static GameObject Overlay(Transform parent, string name, Color color)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+            go.GetComponent<LayoutElement>().ignoreLayout = true;
+            Stretch(go, parent);
+            var img = go.GetComponent<Image>();
+            img.color = color;
+            img.raycastTarget = false;
+            go.SetActive(false);
+            return go;
+        }
+
         // ------------------------------------------------------------------ helpers
 
         private static T CreateView<T>(string name, UIViewKind kind, string id) where T : UIView
@@ -255,7 +446,8 @@ namespace NovaForge.Editor
             go.AddComponent<LayoutElement>().preferredHeight = 120;
             label = go.GetComponentInChildren<TMP_Text>();
             label.fontSize = 44;
-            Localized(label, key);
+            if (key != null) Localized(label, key);
+            go.AddComponent<UIButtonFeedback>();
             return go.GetComponent<Button>();
         }
 

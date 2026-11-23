@@ -283,6 +283,7 @@ namespace NovaForge.Core.UI
         public const string Pause = "pause";
         public const string Win = "win";
         public const string Lose = "lose";
+        public const string LevelResult = "level_result";
         public const string Reward = "reward";
         public const string Confirm = "confirm";
         public const string DailyReward = "daily_reward";

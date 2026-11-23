@@ -50,6 +50,17 @@ namespace NovaForge.Core.Tests
         }
 
         [Test]
+        public void FullscreenAd_PublishesStartAndEnd_EvenOnFailure()
+        {
+            var states = new System.Collections.Generic.List<bool>();
+            _env.Events.Subscribe<FullscreenAdStateChanged>(e => states.Add(e.Showing));
+            WatchFor50Coins();
+            _provider.NextRewardedResult = new AdShowResult(AdShowStatus.Failed, false, "sdk");
+            WatchFor50Coins();
+            CollectionAssert.AreEqual(new[] { true, false, true, false }, states);
+        }
+
+        [Test]
         public void Rewarded_SkippedOrFailed_GrantsNothing()
         {
             _provider.NextRewardedResult = new AdShowResult(AdShowStatus.Skipped, false);

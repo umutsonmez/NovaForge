@@ -99,6 +99,9 @@ namespace NovaForge.Core.Meta
             }
         }
 
+        /// <summary>Current schedule (config-driven, may change with remote config).</summary>
+        public IReadOnlyList<RewardBundle> Schedule => _schedule();
+
         public RewardBundle NextReward
         {
             get { var s = _schedule(); return s.Count == 0 ? null : s[CurrentDayIndex]; }

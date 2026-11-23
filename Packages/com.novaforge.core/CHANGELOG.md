@@ -3,6 +3,12 @@ All notable changes to `com.novaforge.core` are documented here. Format: [Keep a
 
 ## [Unreleased]
 ### Added
+- Ready-made views: `LevelResultView` (stars, reward, rewarded-ad x2, `LevelResultChosen` event), `DailyRewardView`
+  (calendar, countdown, `EnqueueIfClaimable`), `ShopView` (soft + real money, restore on iOS), `UIButtonFeedback`, `RewardText`.
+- Audio: `AudioService` (music crossfade, pooled SFX with cooldown and voice stealing, live settings, silent during
+  full-screen ads), `AudioLibrary`, `Haptics` (Android amplitude one-shot, iOS heavy only).
+- Core: `FullscreenAdStateChanged` event, `DailyRewardService.Schedule`, `ViewIds.LevelResult`, 15 more `CoreStrings` keys.
+- Editor builders: level result, daily reward, shop, audio service.
 - UI framework: engine-independent `NavigationService` (screen stack, popup stack, priority popup queue, back-button policy,
   serialized transitions), `PlayerSettingsService`, `CoreStrings` (8 languages), `IPrivacyOptionsProvider`.
 - `NovaForge.UI` assembly (uGUI 2.0 + TMP): `UIView`, `UIManager`, `ConfirmPopup`, `SettingsView`, `LocalizedText`, `CurrencyDisplay`.

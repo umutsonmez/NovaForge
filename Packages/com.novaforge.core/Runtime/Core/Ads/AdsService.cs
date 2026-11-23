@@ -85,6 +85,7 @@ namespace NovaForge.Core.Ads
         private readonly IErrorHandler _errors;
         private readonly Func<AdPolicy> _policySource;
         private readonly SubscriptionBag _subs = new SubscriptionBag();
+        private readonly IEventBus _events;
 
         private bool _initialized;
         private bool _showing;
@@ -109,6 +110,7 @@ namespace NovaForge.Core.Ads
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _errors = errors ?? throw new ArgumentNullException(nameof(errors));
+            _events = events;
             if (events != null)
             {
                 _subs.Add(events.Subscribe<ConsentChanged>(_ => SafeCall(() => _provider.UpdatePrivacy(PrivacyOptions()), "UpdatePrivacy")));
@@ -170,7 +172,7 @@ namespace NovaForge.Core.Ads
 
             // Unique per request: used as the idempotency key for the grant.
             var requestId = $"ad:{placement}:{TimeUtil.ToUnixMs(_clock.UtcNow)}:{++_requestCounter}";
-            _showing = true;
+            SetShowing(true, AdFormat.Rewarded);
             AdShowResult result;
             try
             {
@@ -183,7 +185,7 @@ namespace NovaForge.Core.Ads
             }
             finally
             {
-                _showing = false;
+                SetShowing(false, AdFormat.Rewarded);
                 SafeCall(() => _provider.LoadRewarded(placement), "LoadRewarded");
             }
 
@@ -264,7 +266,7 @@ namespace NovaForge.Core.Ads
                 return false;
             }
 
-            _showing = true;
+            SetShowing(true, AdFormat.Interstitial);
             AdShowResult result;
             try
             {
@@ -277,7 +279,7 @@ namespace NovaForge.Core.Ads
             }
             finally
             {
-                _showing = false;
+                SetShowing(false, AdFormat.Interstitial);
                 SafeCall(() => _provider.LoadInterstitial(placement), "LoadInterstitial");
             }
 
@@ -304,6 +306,12 @@ namespace NovaForge.Core.Ads
         public void HideBanner() => SafeCall(() => _provider.HideBanner(), "HideBanner");
 
         public void Dispose() => _subs.Dispose();
+
+        private void SetShowing(bool showing, AdFormat format)
+        {
+            _showing = showing;
+            _events?.Publish(new FullscreenAdStateChanged(showing, format));
+        }
 
         // ---------------- helpers ----------------
 
@@ -345,6 +353,17 @@ namespace NovaForge.Core.Ads
             try { return q(); }
             catch (Exception ex) { _errors.Report(ex, $"Ads '{_provider.Name}' query"); return false; }
         }
+    }
+
+    /// <summary>
+    /// A full-screen ad started or finished. Audio mutes and gameplay pauses on this (on iOS the ad SDKs do not pause
+    /// Unity's audio; on Android the app usually gets paused, but not always).
+    /// </summary>
+    public readonly struct FullscreenAdStateChanged
+    {
+        public readonly bool Showing;
+        public readonly AdFormat Format;
+        public FullscreenAdStateChanged(bool showing, AdFormat format) { Showing = showing; Format = format; }
     }
 
     public static class AdPlacements
