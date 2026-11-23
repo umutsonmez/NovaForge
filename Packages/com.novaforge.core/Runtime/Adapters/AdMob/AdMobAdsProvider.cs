@@ -1,17 +1,18 @@
-// STATUS: written from official AdMob Unity docs (plugin 11.x, read 2026-11-23) but NOT YET COMPILED in Unity.
-// Items NOT confirmed on the docs pages and to verify on first compile:
-//   - namespace GoogleMobileAds.Ump.Api for UMP types
-//   - BannerView.Show() / BannerView.Hide()
-//   - ConsentInformation.Update callback signature Action<FormError>
+// STATUS: written from official AdMob Unity docs (plugin 11.x, read 2026-11-23).
+// Compiled successfully against com.google.ads.mobile 11.7.0 in Unity 6000.3.29f1 (2026-11-23).
+// Runtime behaviour (real ads, consent form) still needs an on-device test.
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GoogleMobileAds.Api;
+using GoogleMobileAds.Common;
 using GoogleMobileAds.Ump.Api;
 using NovaForge.Core.Ads;
 using NovaForge.Core.Foundation;
 using NovaForge.Core.Privacy;
 using UnityEngine;
+using AdFormat = NovaForge.Core.Ads.AdFormat;
+using ConsentStatus = NovaForge.Core.Privacy.ConsentStatus;
 
 namespace NovaForge.Ads.AdMob
 {
@@ -31,7 +32,8 @@ namespace NovaForge.Ads.AdMob
     ///
     /// Startup order (per Google docs): UMP consent update → consent form if required → CanRequestAds()
     /// → RequestConfiguration → MobileAds.Initialize → load ads. No ad is requested before CanRequestAds() is true.
-    /// Ad events are raised on the Unity main thread (MobileAds.RaiseAdEventsOnUnityMainThread).
+    /// Every SDK callback is marshalled to the Unity main thread with MobileAdsEventExecutor.ExecuteInUpdate
+    /// (plugin 11.7 obsoleted MobileAds.RaiseAdEventsOnUnityMainThread).
     /// </summary>
     public sealed class AdMobAdsProvider : IAdsProvider
     {
@@ -75,8 +77,6 @@ namespace NovaForge.Ads.AdMob
         public async Task<bool> InitializeAsync(AdPrivacyOptions privacy)
         {
             _privacy = privacy;
-            MobileAds.RaiseAdEventsOnUnityMainThread = true;
-
             var consent = await GatherConsentAsync();
             PrivacyOptionsRequired = consent.PrivacyOptionsRequired;
             ConsentResolved?.Invoke(consent);
@@ -89,7 +89,7 @@ namespace NovaForge.Ads.AdMob
             ApplyRequestConfiguration();
 
             var tcs = new TaskCompletionSource<bool>();
-            MobileAds.Initialize(status => tcs.TrySetResult(status != null));
+            MobileAds.Initialize(status => OnMain(() => tcs.TrySetResult(status != null)));
             _initialized = await tcs.Task;
             if (_initialized) _log.Info(Tag, "Mobile Ads SDK initialized.");
             return _initialized;
@@ -107,7 +107,7 @@ namespace NovaForge.Ads.AdMob
         public Task<string> ShowPrivacyOptionsFormAsync()
         {
             var tcs = new TaskCompletionSource<string>();
-            ConsentForm.ShowPrivacyOptionsForm(error => tcs.TrySetResult(error?.Message));
+            ConsentForm.ShowPrivacyOptionsForm(error => OnMain(() => tcs.TrySetResult(error?.Message)));
             return tcs.Task;
         }
 
@@ -124,7 +124,7 @@ namespace NovaForge.Ads.AdMob
                 };
             }
 
-            ConsentInformation.Update(request, updateError =>
+            ConsentInformation.Update(request, updateError => OnMain(() =>
             {
                 if (updateError != null)
                 {
@@ -132,11 +132,11 @@ namespace NovaForge.Ads.AdMob
                     tcs.TrySetResult(new AdMobConsentResult(ConsentInformation.CanRequestAds(), IsPrivacyOptionsRequired(), updateError.Message));
                     return;
                 }
-                ConsentForm.LoadAndShowConsentFormIfRequired(formError =>
+                ConsentForm.LoadAndShowConsentFormIfRequired(formError => OnMain(() =>
                 {
                     tcs.TrySetResult(new AdMobConsentResult(ConsentInformation.CanRequestAds(), IsPrivacyOptionsRequired(), formError?.Message));
-                });
-            });
+                }));
+            }));
             return tcs.Task;
         }
 
@@ -160,7 +160,7 @@ namespace NovaForge.Ads.AdMob
         {
             if (!_initialized || _rewardedLoading || (_rewarded != null && _rewarded.CanShowAd()) || string.IsNullOrEmpty(_ids.Rewarded)) return;
             _rewardedLoading = true;
-            RewardedAd.Load(_ids.Rewarded, new AdRequest(), (ad, error) =>
+            RewardedAd.Load(_ids.Rewarded, new AdRequest(), (ad, error) => OnMain(() =>
             {
                 _rewardedLoading = false;
                 if (error != null || ad == null)
@@ -172,8 +172,8 @@ namespace NovaForge.Ads.AdMob
                 _rewardedRetry = 0;
                 _rewarded?.Destroy();
                 _rewarded = ad;
-                ad.OnAdPaid += v => ReportPaid(AdFormat.Rewarded, v);
-            });
+                ad.OnAdPaid += v => OnMain(() => ReportPaid(AdFormat.Rewarded, v));
+            }));
         }
 
         public bool IsRewardedReady(string placement) => _rewarded != null && _rewarded.CanShowAd();
@@ -187,20 +187,20 @@ namespace NovaForge.Ads.AdMob
             var tcs = new TaskCompletionSource<AdShowResult>();
             bool earned = false;
 
-            ad.OnAdFullScreenContentClosed += async () =>
+            ad.OnAdFullScreenContentClosed += () => OnMain(async () =>
             {
-                // The reward callback normally precedes "closed"; give it one short grace period in case it doesn't.
+                // Both callbacks are queued for the next Update; give a late reward callback one short grace period.
                 if (!earned) await Task.Delay(300);
                 ad.Destroy();
                 tcs.TrySetResult(new AdShowResult(earned ? AdShowStatus.Completed : AdShowStatus.Skipped, earned));
-            };
-            ad.OnAdFullScreenContentFailed += error =>
+            });
+            ad.OnAdFullScreenContentFailed += error => OnMain(() =>
             {
                 ad.Destroy();
                 tcs.TrySetResult(new AdShowResult(AdShowStatus.Failed, earned, error?.GetMessage()));
-            };
+            });
 
-            ad.Show(reward => earned = true);
+            ad.Show(reward => OnMain(() => earned = true));
             return tcs.Task;
         }
 
@@ -210,7 +210,7 @@ namespace NovaForge.Ads.AdMob
         {
             if (!_initialized || _interstitialLoading || (_interstitial != null && _interstitial.CanShowAd()) || string.IsNullOrEmpty(_ids.Interstitial)) return;
             _interstitialLoading = true;
-            InterstitialAd.Load(_ids.Interstitial, new AdRequest(), (ad, error) =>
+            InterstitialAd.Load(_ids.Interstitial, new AdRequest(), (ad, error) => OnMain(() =>
             {
                 _interstitialLoading = false;
                 if (error != null || ad == null)
@@ -222,8 +222,8 @@ namespace NovaForge.Ads.AdMob
                 _interstitialRetry = 0;
                 _interstitial?.Destroy();
                 _interstitial = ad;
-                ad.OnAdPaid += v => ReportPaid(AdFormat.Interstitial, v);
-            });
+                ad.OnAdPaid += v => OnMain(() => ReportPaid(AdFormat.Interstitial, v));
+            }));
         }
 
         public bool IsInterstitialReady(string placement) => _interstitial != null && _interstitial.CanShowAd();
@@ -234,16 +234,16 @@ namespace NovaForge.Ads.AdMob
             var ad = _interstitial;
             _interstitial = null;
             var tcs = new TaskCompletionSource<AdShowResult>();
-            ad.OnAdFullScreenContentClosed += () =>
+            ad.OnAdFullScreenContentClosed += () => OnMain(() =>
             {
                 ad.Destroy();
                 tcs.TrySetResult(new AdShowResult(AdShowStatus.Completed, false));
-            };
-            ad.OnAdFullScreenContentFailed += error =>
+            });
+            ad.OnAdFullScreenContentFailed += error => OnMain(() =>
             {
                 ad.Destroy();
                 tcs.TrySetResult(new AdShowResult(AdShowStatus.Failed, false, error?.GetMessage()));
-            };
+            });
             ad.Show();
             return tcs.Task;
         }
@@ -256,8 +256,8 @@ namespace NovaForge.Ads.AdMob
             if (_banner == null)
             {
                 _banner = new BannerView(_ids.Banner, AdSize.Banner, position == BannerPosition.Top ? AdPosition.Top : AdPosition.Bottom);
-                _banner.OnBannerAdLoadFailed += error => _log.Warning(Tag, $"Banner load failed: {error?.GetMessage()}");
-                _banner.OnAdPaid += v => ReportPaid(AdFormat.Banner, v);
+                _banner.OnBannerAdLoadFailed += error => OnMain(() => _log.Warning(Tag, $"Banner load failed: {error?.GetMessage()}"));
+                _banner.OnAdPaid += v => OnMain(() => ReportPaid(AdFormat.Banner, v));
                 _banner.LoadAd(new AdRequest());
             }
             _banner.Show();
@@ -269,6 +269,9 @@ namespace NovaForge.Ads.AdMob
         }
 
         // ------------------------------------------------------------------ helpers
+
+        /// <summary>SDK callbacks may arrive on a background thread; run them in the next Unity Update.</summary>
+        private static void OnMain(Action action) => MobileAdsEventExecutor.ExecuteInUpdate(action);
 
         private void ReportPaid(AdFormat format, AdValue value)
         {

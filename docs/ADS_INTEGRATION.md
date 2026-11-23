@@ -8,14 +8,15 @@ A/B ile karşılaştırılacak. Değişim yalnızca `IAdsProvider` adaptörü de
 | Parça | Durum |
 |---|---|
 | Core: `IAdsProvider`, `AdsService`, `AdPolicy`, `MockAdsProvider` | ✅ tamam, test edildi |
-| `NovaForge.Ads.AdMob` adaptörü (`Runtime/Adapters/AdMob`) | ⚠️ resmi dokümana göre yazıldı, **Unity'de henüz derlenmedi** |
+| `NovaForge.Ads.AdMob` adaptörü (`Runtime/Adapters/AdMob`) | ✅ `com.google.ads.mobile` 11.7.0 + Unity 6000.3.29f1 ile uyarısız derleniyor |
 | Cihaz testi (test reklamları, UMP formu, ATT) | ❌ Unity + cihaz gerekli |
 
 Adaptör asmdef'i yalnızca `com.google.ads.mobile` ≥ 11.0.0 kuruluysa derlenir (`versionDefines` → `NOVAFORGE_ADMOB`).
 Paket kurulu değilse adaptör yok sayılır, projenin geri kalanı etkilenmez.
 
-İlk derlemede doğrulanacak noktalar (dokümanda doğrudan görülmedi):
-`GoogleMobileAds.Ump.Api` namespace'i, `BannerView.Show()/Hide()`, `ConsentInformation.Update` callback imzası.
+Derlemede doğrulandı: `GoogleMobileAds.Ump.Api` namespace'i, `BannerView.Show()/Hide()`, `ConsentInformation.Update` callback imzası.
+Not: plugin 11.7'de `MobileAds.RaiseAdEventsOnUnityMainThread` **obsolete**; adaptör her callback'i
+`MobileAdsEventExecutor.ExecuteInUpdate` ile main thread'e taşır.
 
 ## Kurulum (oyun projesinde)
 1. OpenUPM üzerinden (Google'ın önerdiği yöntem) — `Packages/manifest.json`:
@@ -59,7 +60,7 @@ protected override void OnCoreReady(NovaForgeCore core)
 - **Ödül:** `Show(reward => ...)` callback'i + `OnAdFullScreenContentClosed` tek `AdShowResult`'ta birleşir. Ödül yalnızca reward callback geldiyse verilir.
 - **Tek kullanımlık nesneler:** her gösterimden sonra `Destroy()` çağrılır, yenisi yüklenir.
 - **Yükleme hatası:** üstel geri çekilme (2→64 sn).
-- **Main thread:** `MobileAds.RaiseAdEventsOnUnityMainThread = true`.
+- **Main thread:** tüm SDK callback'leri `MobileAdsEventExecutor.ExecuteInUpdate` ile Unity main thread'ine taşınır.
 - **Test / production ID koruması:**
   - Development build: Google test ad unit'leri kullanılır. Geliştirirken gerçek reklama tıklamak AdMob hesabının kapatılma sebebidir.
   - Release build: test ID'si tespit edilirse uygulama açılışta hata verir. Yani gelir getirmeyen bir sürüm sessizce yayına çıkamaz.

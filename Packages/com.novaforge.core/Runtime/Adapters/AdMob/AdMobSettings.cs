@@ -1,4 +1,4 @@
-// STATUS: written from official AdMob Unity docs (plugin 11.x, read 2026-11-23) but NOT YET COMPILED in Unity.
+// STATUS: compiles against com.google.ads.mobile 11.7.0 in Unity 6000.3.29f1 (verified 2026-11-23). Not yet tested on device.
 // This assembly only compiles when "com.google.ads.mobile" >= 11.0.0 is installed (see asmdef versionDefines).
 using System;
 using UnityEngine;

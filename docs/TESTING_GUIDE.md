@@ -5,8 +5,12 @@
 ```bash
 cd tools/dotnet && dotnet test NovaForge.slnx
 ```
-**Unity içinde:** Window → General → Test Runner → EditMode → `NovaForge.Core.Tests`.
-(Unity Editor'da ilk çalıştırma henüz yapılmadı — bkz. STATUS.md.)
+**Unity içinde:** `Projects/Sandbox` projesini aç → Window → General → Test Runner → EditMode → `NovaForge.Core.Tests`.
+Komut satırı (CI):
+```powershell
+Unity.exe -batchmode -nographics -projectPath Projects/Sandbox -runTests -testPlatform EditMode -testResults TestResults.xml
+```
+Son doğrulama: Unity 6000.3.29f1, Test Framework 1.6.0 → 103/103 (2026-11-23).
 
 ## Kapsam (103 test)
 | Alan | Örnek senaryolar |

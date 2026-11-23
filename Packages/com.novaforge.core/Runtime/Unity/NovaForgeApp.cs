@@ -1,5 +1,4 @@
-// STATUS: written against stable UnityEngine APIs but NOT YET COMPILED in a Unity Editor
-// (no Unity installation was available when this was authored). Verify on first Unity import.
+// STATUS: compiles in Unity 6000.3.29f1 (verified 2026-11-23). Runtime behaviour not yet covered by PlayMode tests.
 using System;
 using NovaForge.Core;
 using UnityEngine;

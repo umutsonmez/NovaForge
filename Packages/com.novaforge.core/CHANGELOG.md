@@ -5,7 +5,10 @@ All notable changes to `com.novaforge.core` are documented here. Format: [Keep a
 ### Added
 - `NovaForge.Ads.AdMob` adapter (Google Mobile Ads Unity plugin 11.x): UMP consent flow, rewarded/interstitial/banner,
   impression revenue event, test-vs-production ad unit guard. Compiles only when `com.google.ads.mobile` >= 11.0.0 is installed.
-  Not yet compiled in Unity.
+  Verified to compile with 11.7.0 in Unity 6000.3.29f1; SDK callbacks marshalled via `MobileAdsEventExecutor.ExecuteInUpdate`.
+- `Projects/Sandbox`: development Unity project referencing the package; 103 EditMode tests pass in Unity Test Framework 1.6.0.
+### Changed
+- Newtonsoft dependency `com.unity.nuget.newtonsoft-json` 3.2.1 -> 3.2.2 (version bundled with Unity 6.3).
 - `AnalyticsEvents.AdImpression`, `AnalyticsParams.AdFormat`.
 
 ## [0.1.0] - 2026-11-23

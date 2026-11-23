@@ -32,3 +32,16 @@ google-services.json
 GoogleService-Info.plist
 **/Secrets/
 .env
+
+# Unity projects under Projects/ (sandbox, reference game, templates)
+Projects/*/[Ll]ibrary/
+Projects/*/[Tt]emp/
+Projects/*/[Oo]bj/
+Projects/*/[Bb]uild/
+Projects/*/[Bb]uilds/
+Projects/*/[Ll]ogs/
+Projects/*/[Uu]ser[Ss]ettings/
+Projects/*/*.csproj
+Projects/*/*.sln
+Projects/*/*.slnx
+Projects/*/TestResults*.xml

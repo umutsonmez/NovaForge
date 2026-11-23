@@ -3,22 +3,31 @@
 Ticari mobil oyunlar (Android + iOS, Unity) için yeniden kullanılabilir üretim altyapısı.
 Çekirdek paket: **`com.novaforge.core`** (`Packages/com.novaforge.core`).
 
-> **Durum:** Faz 1 (motor-bağımsız Core) tamamlandı ve test edildi. Unity katmanı, UI, Editor araçları,
-> SDK adaptörleri ve referans oyun henüz yapılmadı. Ayrıntı: [docs/STATUS.md](docs/STATUS.md).
+> **Durum:** Core + Unity köprüsü + AdMob adaptörü Unity 6.3 LTS'de (6000.3.29f1) derleniyor; 103 test hem Unity'de hem dotnet'te geçiyor.
+> UI, Editor araçları, IAP adaptörü ve referans oyun henüz yapılmadı. Ayrıntı: [docs/STATUS.md](docs/STATUS.md).
 
 ## Hızlı bakış
 
 | Katman | Assembly | Unity bağımlılığı | Doğrulama |
 |---|---|---|---|
-| İş mantığı (economy, save, ads/IAP kuralları, analytics, progression...) | `NovaForge.Core` | Yok (`noEngineReferences: true`) | `dotnet test` ile 103 test geçiyor |
-| Platform köprüsü (bootstrap, log, HTTP, safe area) | `NovaForge.Unity` | Var | **Henüz Unity'de derlenmedi** |
-| Testler | `NovaForge.Core.Tests` | Unity Test Framework / NUnit 3 | Aynı kaynak hem Unity'de hem dotnet'te çalışır |
+| İş mantığı (economy, save, ads/IAP kuralları, analytics, progression...) | `NovaForge.Core` | Yok (`noEngineReferences: true`) | 103 test: Unity Test Runner + `dotnet test` |
+| Platform köprüsü (bootstrap, log, HTTP, safe area) | `NovaForge.Unity` | Var | Derleniyor; PlayMode testi yok |
+| AdMob adaptörü | `NovaForge.Ads.AdMob` | Var + `com.google.ads.mobile` >= 11 | Derleniyor (11.7.0); cihaz testi yok |
+| Testler | `NovaForge.Core.Tests` | Unity Test Framework 1.6 / NUnit 3 | Aynı kaynak hem Unity'de hem dotnet'te çalışır |
 
 ## Gereksinimler
 
 - Unity **6.3 LTS** (6000.3) önerilir; paket minimum `6000.0`.
 - `com.unity.nuget.newtonsoft-json` 3.2.x (paket bağımlılığı, otomatik gelir).
 - Unity olmadan doğrulama için: .NET SDK 8+.
+
+## Unity içinde test (Sandbox projesi)
+
+`Projects/Sandbox`, paketi `file:` referansıyla kullanan geliştirme projesidir (AdMob dahil).
+```powershell
+& "C:/Program Files/Unity/Hub/Editor/6000.3.29f1/Editor/Unity.exe" -batchmode -nographics `
+  -projectPath Projects/Sandbox -runTests -testPlatform EditMode -testResults TestResults.xml -logFile -
+```
 
 ## Unity'siz build ve test
 

@@ -2,30 +2,31 @@
 
 _Son güncelleme: 2026-11-23_
 
-## Ortam bulguları
-- Unity Editor / Unity Hub **kurulu değil** → Unity'ye bağlı hiçbir şey derlenemedi/çalıştırılamadı.
-- .NET SDK 8 ve 10 kurulu → motor-bağımsız Core, Unity'nin derleyici kısıtlarıyla (netstandard2.1, C# 9) derlendi ve test edildi.
+## Ortam
+- Unity **6000.3.29f1** (6.3 LTS) + Android (SDK/NDK/OpenJDK) + iOS Build Support kurulu (2026-11-23).
+- iOS cihaz build'i ve App Store gönderimi için Mac/Xcode gerekir (Windows yalnızca Xcode projesi üretir).
+- .NET SDK 8/10: Unity'siz hızlı doğrulama (`tools/dotnet`).
 
 ## Faz 1 — Motor-bağımsız Core ✅ (doğrulandı)
-Derleme: 0 uyarı / 0 hata. Testler: **103/103 geçti** (`dotnet test`).
+Derleme: 0 uyarı / 0 hata. Testler: **103/103 geçti** — hem Unity Test Runner'da (6000.3.29f1) hem `dotnet test`'te.
 Foundation, Config + Remote Config, Save, Economy, Rewards, Entitlements, Ads (kurallar), IAP (akış + sunucu validator istemcisi),
 Analytics, Consent, Progression, Level Session, Statistics, Missions, Achievements, Daily Rewards, Tutorial, Difficulty, Shop,
 Localization, Object Pool, Composition root (`NovaForgeCore`).
 
-## Faz 1 — Unity köprüsü ⚠️ (yazıldı, doğrulanmadı)
-`NovaForgeApp`, `UnityLogSink`, `UnityStorage`, `UnityHttpTransport`, `SafeAreaFitter`.
-Yalnızca uzun süredir kararlı API'ler kullanıldı ama **Unity'de ilk import'ta derlenmesi doğrulanmalı.**
+## Faz 1 — Unity köprüsü ✅ derleniyor
+`NovaForgeApp`, `UnityLogSink`, `UnityStorage`, `UnityHttpTransport`, `SafeAreaFitter` Unity 6.3'te uyarısız derleniyor.
+Çalışma zamanı davranışı için PlayMode testleri henüz yok.
 
-## Reklam ağı — AdMob ⚠️ (yazıldı, doğrulanmadı)
-Karar: AdMob ile başla, ölçeklenince AppLovin MAX ile A/B. `NovaForge.Ads.AdMob` adaptörü (UMP consent, rewarded, interstitial,
-banner, gelir olayı, test/production ID koruması) resmi dokümana göre yazıldı; Unity + `com.google.ads.mobile` 11.x ile derlenip cihazda test edilmeli.
+## Reklam ağı — AdMob ✅ derleniyor / ⏳ cihaz testi bekliyor
+Karar: AdMob ile başla, ölçeklenince AppLovin MAX ile A/B. `NovaForge.Ads.AdMob` adaptörü `com.google.ads.mobile` 11.7.0 ile
+uyarısız derleniyor. Gerçek cihazda (Android cihaz/emülatör) test reklamları + UMP formu ile denenmesi gerekiyor.
 
 ## Sıradaki fazlar (yapılmadı)
 | Faz | İçerik | Ön koşul |
 |---|---|---|
-| 2 | Unity projesi kurulumu, Core'un Unity Test Runner'da çalıştırılması, Unity köprüsünün doğrulanması | Unity 6.3 LTS kurulumu |
+| 2 | ✅ Sandbox projesi, Core testleri Unity'de, Unity köprüsü + AdMob derlemesi | — |
 | 3 | UI framework (ScreenManager, PopupManager, Navigation, ekranlar, tema), Audio (pooling, mixer), Input (tap/swipe/drag/long-press), Scene transitions, Addressables | Faz 2 |
-| 4 | SDK adaptörleri: Unity IAP 5.x, AdMob adaptörünün doğrulanması, Firebase Analytics/Remote Config/Crashlytics, Google UMP + iOS ATT | Faz 2 + hesaplar |
+| 4 | SDK adaptörleri: Unity IAP 5.x, AdMob cihaz testi, Firebase Analytics/Remote Config/Crashlytics, Google UMP + iOS ATT | Faz 2 + hesaplar |
 | 5 | Editor araçları: NOVAFORGE menüsü, Create New Game, validators (config/monetization/localization), Level Editor, build config | Faz 3 |
 | 6 | Oyun şablonları (Puzzle, Arcade, Hypercasual, Idle, Simulation) | Faz 3-5 |
 | 7 | Referans oyun (tilt + renk karıştırma bulmacası), 30+ bölüm, solver ile çözülebilirlik doğrulaması | Faz 3-5 |
