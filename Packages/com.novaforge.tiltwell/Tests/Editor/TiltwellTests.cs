@@ -245,3 +245,83 @@ namespace NovaForge.Tiltwell.Tests
         }
     }
 }
+
+namespace NovaForge.Tiltwell.Tests
+{
+    public class PuzzleSessionTests
+    {
+        private static LevelData Level(int par, params string[] rows) => new LevelData { Id = "t", Rows = rows, Par = par };
+
+        [Test]
+        public void Solve_CountsMoves_IgnoresNoOps()
+        {
+            var s = new PuzzleSession(Level(2, "#####", "#.y##", "#Y..#", "#...#", "#####"));
+            Assert.IsNull(s.Tilt(Tilt.Left), "no-op ignored");
+            Assert.AreEqual(0, s.Moves);
+            s.Tilt(Tilt.Up);
+            s.Tilt(Tilt.Right);
+            Assert.AreEqual(PuzzleStatus.Solved, s.Status);
+            Assert.AreEqual(3, s.Stars);
+            Assert.IsNull(s.Tilt(Tilt.Down), "input ignored after solving");
+        }
+
+        [Test]
+        public void Undo_And_Restart_RestoreState()
+        {
+            var s = new PuzzleSession(Level(2, "#####", "#.y##", "#Y..#", "#...#", "#####"));
+            s.Tilt(Tilt.Down);
+            s.Tilt(Tilt.Right);
+            Assert.IsTrue(s.Undo());
+            Assert.AreEqual(1, s.Moves);
+            s.Restart();
+            Assert.AreSame(s.Start, s.State);
+            Assert.AreEqual(0, s.Moves);
+            Assert.IsFalse(s.Undo());
+        }
+
+        [Test]
+        public void Stuck_WhenNeededDropletFallsInHole_UndoRecovers()
+        {
+            var s = new PuzzleSession(Level(2, "#####", "#Rx.#", "#..r#", "#####"));
+            s.Tilt(Tilt.Right);
+            Assert.AreEqual(PuzzleStatus.Stuck, s.Status);
+            Assert.IsNull(s.Hint());
+            Assert.IsTrue(s.Undo());
+            Assert.AreEqual(PuzzleStatus.Playing, s.Status);
+            Assert.IsNotNull(s.Hint());
+        }
+
+        [Test]
+        public void OutOfMoves_ExtraMovesExtendLimit_StarsStillCountAllMoves()
+        {
+            // Par 1 → limit 6. Bounce up/down without solving.
+            var s = new PuzzleSession(Level(1, "######", "#R...#", "#....#", "#...r#", "######"));
+            for (int i = 0; i < 6; i++) s.Tilt(i % 2 == 0 ? Tilt.Down : Tilt.Up);
+            Assert.AreEqual(PuzzleStatus.OutOfMoves, s.Status);
+            Assert.IsNull(s.Tilt(Tilt.Right));
+            s.AddMoves(3);
+            Assert.AreEqual(PuzzleStatus.Playing, s.Status);
+            s.Tilt(Tilt.Down);
+            s.Tilt(Tilt.Right);
+            Assert.AreEqual(PuzzleStatus.Solved, s.Status);
+            Assert.AreEqual(1, s.Stars, "8 moves on par 1");
+        }
+
+        [Test]
+        public void Hint_LeadsToSolution_OnEveryShippedLevel()
+        {
+            foreach (var level in LevelPackTests.LoadShipped().Levels)
+            {
+                var s = new PuzzleSession(level);
+                for (int i = 0; i < level.Par; i++)
+                {
+                    var hint = s.Hint();
+                    Assert.IsTrue(hint.HasValue, level.Id);
+                    s.Tilt(hint.Value);
+                }
+                Assert.AreEqual(PuzzleStatus.Solved, s.Status, level.Id);
+                Assert.AreEqual(3, s.Stars, level.Id);
+            }
+        }
+    }
+}

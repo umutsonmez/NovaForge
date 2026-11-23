@@ -2,7 +2,14 @@
 All notable changes to `com.novaforge.core` are documented here. Format: [Keep a Changelog](https://keepachangelog.com), versioning: SemVer (see docs/VERSIONING.md).
 
 ## [Unreleased]
+### Changed
+- UI and Unity MonoBehaviours split into one file per class (`Widgets.cs`, `StandardViews.cs`, `GameViews.cs` removed): scene/prefab references to them now serialize.
+- `UIManager` missing-view error lists the known view ids.
+- `AudioService.PlayMusic` is silent when no `AudioLibrary` is assigned; `DailyRewardView` tolerates a torn-down Core.
+
 ### Added
+- `NovaForgeApp.OnCoreBuilt` hook (runs before initialization; connect consent bridges here).
+- Editor test guarding that every MonoBehaviour/ScriptableObject lives in `<ClassName>.cs` (otherwise saved scenes lose the script).
 - Ready-made views: `LevelResultView` (stars, reward, rewarded-ad x2, `LevelResultChosen` event), `DailyRewardView`
   (calendar, countdown, `EnqueueIfClaimable`), `ShopView` (soft + real money, restore on iOS), `UIButtonFeedback`, `RewardText`.
 - Audio: `AudioService` (music crossfade, pooled SFX with cooldown and voice stealing, live settings, silent during

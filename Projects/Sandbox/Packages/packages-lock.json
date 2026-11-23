@@ -19,6 +19,16 @@
         "com.unity.ugui": "2.0.0"
       }
     },
+    "com.novaforge.tiltwell": {
+      "version": "file:../../../Packages/com.novaforge.tiltwell",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.novaforge.core": "0.1.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.2",
+        "com.unity.ugui": "2.0.0"
+      }
+    },
     "com.unity.ext.nunit": {
       "version": "2.0.5",
       "depth": 1,

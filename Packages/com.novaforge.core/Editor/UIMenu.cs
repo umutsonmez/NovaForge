@@ -345,7 +345,7 @@ namespace NovaForge.Editor
             Selection.activeGameObject = host;
         }
 
-        private static GameObject Overlay(Transform parent, string name, Color color)
+        public static GameObject Overlay(Transform parent, string name, Color color)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(LayoutElement));
             go.GetComponent<LayoutElement>().ignoreLayout = true;
@@ -359,7 +359,7 @@ namespace NovaForge.Editor
 
         // ------------------------------------------------------------------ helpers
 
-        private static T CreateView<T>(string name, UIViewKind kind, string id) where T : UIView
+        public static T CreateView<T>(string name, UIViewKind kind, string id) where T : UIView
         {
             var manager = UnityEngine.Object.FindAnyObjectByType<UIManager>(FindObjectsInactive.Include);
             if (manager == null) manager = CreateUIRoot().GetComponent<UIManager>();
@@ -379,7 +379,7 @@ namespace NovaForge.Editor
             return view;
         }
 
-        private static Transform CreatePanel(Transform parent, Vector2 size)
+        public static Transform CreatePanel(Transform parent, Vector2 size)
         {
             var panel = new GameObject("Panel", typeof(RectTransform), typeof(Image));
             panel.transform.SetParent(parent, false);
@@ -393,7 +393,7 @@ namespace NovaForge.Editor
             return panel.transform;
         }
 
-        private static Transform Vertical(Transform panel, int padding, float spacing)
+        public static Transform Vertical(Transform panel, int padding, float spacing)
         {
             var v = panel.gameObject.AddComponent<VerticalLayoutGroup>();
             v.padding = new RectOffset(padding, padding, padding, padding);
@@ -405,7 +405,7 @@ namespace NovaForge.Editor
             return panel;
         }
 
-        private static Transform Row(Transform parent, string label, string key)
+        public static Transform Row(Transform parent, string label, string key)
         {
             var row = new GameObject(label + "Row", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
             row.transform.SetParent(parent, false);
@@ -423,7 +423,7 @@ namespace NovaForge.Editor
             return row.transform;
         }
 
-        private static TMP_Text Text(Transform parent, string name, string value, float size, FontStyles style, float height)
+        public static TMP_Text Text(Transform parent, string name, string value, float size, FontStyles style, float height)
         {
             var go = TMP_DefaultControls.CreateText(TmpResources());
             go.name = name;
@@ -438,7 +438,7 @@ namespace NovaForge.Editor
             return t;
         }
 
-        private static Button Button(Transform parent, string name, string key, out TMP_Text label)
+        public static Button Button(Transform parent, string name, string key, out TMP_Text label)
         {
             var go = TMP_DefaultControls.CreateButton(TmpResources());
             go.name = name;
@@ -451,7 +451,7 @@ namespace NovaForge.Editor
             return go.GetComponent<Button>();
         }
 
-        private static void Localized(TMP_Text text, string key)
+        public static void Localized(TMP_Text text, string key)
         {
             var loc = text.gameObject.AddComponent<LocalizedText>();
             var so = new SerializedObject(loc);
@@ -459,13 +459,13 @@ namespace NovaForge.Editor
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void Flexible(GameObject go, float weight)
+        public static void Flexible(GameObject go, float weight)
         {
             if (!go.TryGetComponent<LayoutElement>(out var le)) le = go.AddComponent<LayoutElement>();
             le.flexibleWidth = weight;
         }
 
-        private static Transform Stretch(GameObject go, Transform parent)
+        public static Transform Stretch(GameObject go, Transform parent)
         {
             go.transform.SetParent(parent, false);
             var rt = (RectTransform)go.transform;
@@ -494,7 +494,7 @@ namespace NovaForge.Editor
             EditorGUIUtility.PingObject(c.gameObject);
         }
 
-        private static DefaultControls.Resources UiResources() => new DefaultControls.Resources
+        public static DefaultControls.Resources UiResources() => new DefaultControls.Resources
         {
             standard = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd"),
             background = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd"),
@@ -505,7 +505,7 @@ namespace NovaForge.Editor
             mask = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UIMask.psd"),
         };
 
-        private static TMP_DefaultControls.Resources TmpResources()
+        public static TMP_DefaultControls.Resources TmpResources()
         {
             var r = UiResources();
             return new TMP_DefaultControls.Resources

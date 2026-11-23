@@ -4,7 +4,7 @@ Ticari mobil oyunlar (Android + iOS, Unity) için yeniden kullanılabilir üreti
 Çekirdek paket: **`com.novaforge.core`** (`Packages/com.novaforge.core`).
 
 > **Durum:** Core + Unity köprüsü + AdMob adaptörü Unity 6.3 LTS'de (6000.3.29f1) derleniyor; 103 test hem Unity'de hem dotnet'te geçiyor.
-> UI framework çekirdeği hazır. IAP adaptörü, Level Editor ve referans oyun henüz yapılmadı. Ayrıntı: [docs/STATUS.md](docs/STATUS.md).
+> Core, UI, ses ve referans oyun Tiltwell (36 bölüm) editörde oynanabilir. IAP adaptörü, Level Editor ve cihaz testleri henüz yapılmadı. Ayrıntı: [docs/STATUS.md](docs/STATUS.md).
 
 ## Hızlı bakış
 
@@ -14,6 +14,7 @@ Ticari mobil oyunlar (Android + iOS, Unity) için yeniden kullanılabilir üreti
 | Platform köprüsü (bootstrap, log, HTTP, safe area) | `NovaForge.Unity` | Var | Derleniyor; PlayMode testi yok |
 | AdMob adaptörü | `NovaForge.Ads.AdMob` | Var + `com.google.ads.mobile` >= 11 | Derleniyor (11.7.0); cihaz testi yok |
 | UI framework (navigasyon, view'lar, ayarlar, editor menüsü) | `NovaForge.UI`, `NovaForge.Editor` | uGUI 2.0 + TMP | 5 PlayMode testi; bkz. [docs/UI_FRAMEWORK.md](docs/UI_FRAMEWORK.md) |
+| Referans oyun Tiltwell (eğ + renk karıştır bulmaca) | `com.novaforge.tiltwell` | Core + UI | 22 dotnet + 2 uçtan uca PlayMode testi; bkz. [docs/TILTWELL.md](docs/TILTWELL.md) |
 | Testler | `NovaForge.Core.Tests` | Unity Test Framework 1.6 / NUnit 3 | Aynı kaynak hem Unity'de hem dotnet'te çalışır |
 
 ## Gereksinimler
@@ -55,5 +56,6 @@ bootstrap sınıfı yazıp `GameSetup` doldurulur — bkz. [docs/ARCHITECTURE.md
 - [CORE_MODULES.md](docs/CORE_MODULES.md) — modül modül API ve garantiler
 - [MONETIZATION_GUIDE.md](docs/MONETIZATION_GUIDE.md), [ADS_INTEGRATION.md](docs/ADS_INTEGRATION.md), [IAP_INTEGRATION.md](docs/IAP_INTEGRATION.md)
 - [CODING_STANDARDS.md](docs/CODING_STANDARDS.md), [TESTING_GUIDE.md](docs/TESTING_GUIDE.md), [VERSIONING.md](docs/VERSIONING.md)
+- [TILTWELL.md](docs/TILTWELL.md) — referans oyun: kurallar, bölüm üretimi, sahne builder
 - [STATUS.md](docs/STATUS.md) — ne bitti, ne kaldı, bilinen sınırlar
 - [NAME_RESEARCH.md](docs/NAME_RESEARCH.md) — referans oyun isim araştırması

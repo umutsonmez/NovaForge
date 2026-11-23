@@ -30,6 +30,12 @@ namespace NovaForge.Unity
         /// <summary>Game-specific composition: economy, levels, products, providers...</summary>
         protected abstract GameSetup CreateSetup();
 
+        /// <summary>
+        /// Called right after Core is built, before InitializeAsync. Wire things that must exist before SDKs start,
+        /// e.g. AdMobConsentBridge.Connect(provider, core.Consent).
+        /// </summary>
+        protected virtual void OnCoreBuilt(NovaForgeCore core) { }
+
         /// <summary>Called after Core.InitializeAsync finished (successfully or not). Load the main menu here.</summary>
         protected abstract void OnCoreReady(NovaForgeCore core);
 
@@ -51,6 +57,7 @@ namespace NovaForge.Unity
             setup.LogSinks.Add(new UnityLogSink());
             if (setup.Storage == null) setup.Storage = UnityStorage.ForGame(setup.GameId);
             Core = NovaForgeCore.Build(setup);
+            OnCoreBuilt(Core);
         }
 
         protected virtual async void Start()

@@ -1,0 +1,26 @@
+{
+    "name": "NovaForge.Tiltwell",
+    "rootNamespace": "NovaForge.Tiltwell.Unity",
+    "references": [
+        "NovaForge.Core",
+        "NovaForge.Unity",
+        "NovaForge.UI",
+        "NovaForge.Tiltwell.Logic",
+        "NovaForge.Ads.AdMob",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        { "name": "com.unity.inputsystem", "expression": "1.0.0", "define": "TILTWELL_INPUT_SYSTEM" },
+        { "name": "com.google.ads.mobile", "expression": "11.0.0", "define": "TILTWELL_ADMOB" }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,22 @@
+{
+    "name": "NovaForge.Tiltwell.PlayTests",
+    "rootNamespace": "NovaForge.Tiltwell.PlayTests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "NovaForge.Core",
+        "NovaForge.Unity",
+        "NovaForge.UI",
+        "NovaForge.Tiltwell",
+        "NovaForge.Tiltwell.Logic",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll", "Newtonsoft.Json.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

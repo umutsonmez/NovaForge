@@ -84,7 +84,8 @@ namespace NovaForge.UI
         {
             if (_instances.TryGetValue(id, out var view)) return view;
             if (!_prefabs.TryGetValue(id, out var prefab))
-                throw new KeyNotFoundException($"UI view '{id}' is neither in the scene nor in UIManager.viewPrefabs.");
+                throw new KeyNotFoundException($"UI view '{id}' is neither in the scene nor in UIManager.viewPrefabs " +
+                    $"(UIManager '{name}', known: {string.Join(", ", _instances.Keys)}).");
             var parent = prefab.Kind == UIViewKind.Popup ? popupRoot : screenRoot;
             view = Instantiate(prefab, parent != null ? parent : (RectTransform)transform, false);
             view.SetId(id);

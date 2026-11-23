@@ -1,0 +1,23 @@
+{
+    "name": "NovaForge.Tiltwell.Editor",
+    "rootNamespace": "NovaForge.Tiltwell.Editor",
+    "references": [
+        "NovaForge.Core",
+        "NovaForge.Unity",
+        "NovaForge.UI",
+        "NovaForge.Editor",
+        "NovaForge.Tiltwell",
+        "NovaForge.Tiltwell.Logic",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

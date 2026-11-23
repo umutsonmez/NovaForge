@@ -118,8 +118,8 @@ namespace NovaForge.Unity.Audio
 
         public void PlayMusic(string id, float fade = -1f)
         {
-            if (id == _currentMusicId) return;
-            var entry = library != null ? library.FindMusic(id) : null;
+            if (id == _currentMusicId || library == null) return; // no library = audio not set up yet: stay silent
+            var entry = library.FindMusic(id);
             if (entry == null || entry.clip == null)
             {
                 Debug.LogWarning($"[NovaForge] Music '{id}' not in AudioLibrary.");

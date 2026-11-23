@@ -31,6 +31,12 @@ Detay: [UI_FRAMEWORK.md](UI_FRAMEWORK.md). `NavigationService` (ekran/popup yı�
 Testler: EditMode 118/118, PlayMode 8/8, dotnet 118/118. Android + iOS **player script derlemesi** temiz (AdMob dahil).
 Cihazda henüz çalıştırılmadı: titreşim, gerçek reklam, gerçek ses çıkışı.
 
+## Faz 7 — Referans oyun Tiltwell ✅ oynanabilir (editörde doğrulandı)
+Detay: [TILTWELL.md](TILTWELL.md). 36 solver-doğrulamalı bölüm, ana menü, bölüm seçimi, oyun ekranı (swipe, geri al, yeniden başlat, ipucu,
+ekstra hamle reklamı), sonuç/günlük ödül/mağaza/ayarlar Core ekranlarından. Sahne builder ile üretiliyor.
+Testler: EditMode 141/141, PlayMode 10/10 (uçtan uca bölüm çözme dahil), dotnet 118 + 22. Android + iOS player derlemesi temiz.
+Eksik: ses dosyaları, ikon/mağaza görselleri, JP/KR font, cihaz testi.
+
 ## Sıradaki fazlar (yapılmadı)
 | Faz | İçerik | Ön koşul |
 |---|---|---|
@@ -39,7 +45,7 @@ Cihazda henüz çalıştırılmadı: titreşim, gerçek reklam, gerçek ses çı
 | 4 | SDK adaptörleri: Unity IAP 5.x, AdMob cihaz testi, Firebase Analytics/Remote Config/Crashlytics, Google UMP + iOS ATT | Faz 2 + hesaplar |
 | 5 | Editor araçları: NOVAFORGE menüsü, Create New Game, validators (config/monetization/localization), Level Editor, build config | Faz 3 |
 | 6 | Oyun şablonları (Puzzle, Arcade, Hypercasual, Idle, Simulation) | Faz 3-5 |
-| 7 | Referans oyun (tilt + renk karıştırma bulmacası), 30+ bölüm, solver ile çözülebilirlik doğrulaması | Faz 3-5 |
+| 7 | ✅ Tiltwell oynanabilir. Kalan: ses, görseller, cihaz testi, mağaza materyali | Faz 3-5 |
 | 8 | Satın alma doğrulama backend'i, sandbox testleri, BUILD_AND_RELEASE süreci | Faz 4 |
 
 Henüz yazılmayan dokümanlar (ilgili sistemle birlikte gelecek; boş placeholder üretilmedi):
