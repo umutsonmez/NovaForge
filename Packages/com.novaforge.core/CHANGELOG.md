@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to `com.novaforge.core` are documented here. Format: [Keep a Changelog](https://keepachangelog.com), versioning: SemVer (see docs/VERSIONING.md).
 
+## [Unreleased]
+### Added
+- `NovaForge.Ads.AdMob` adapter (Google Mobile Ads Unity plugin 11.x): UMP consent flow, rewarded/interstitial/banner,
+  impression revenue event, test-vs-production ad unit guard. Compiles only when `com.google.ads.mobile` >= 11.0.0 is installed.
+  Not yet compiled in Unity.
+- `AnalyticsEvents.AdImpression`, `AnalyticsParams.AdFormat`.
+
 ## [0.1.0] - 2026-11-23
 ### Added
 - Engine-independent core assembly (`NovaForge.Core`, `noEngineReferences: true`):

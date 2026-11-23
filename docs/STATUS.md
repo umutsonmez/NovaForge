@@ -16,12 +16,16 @@ Localization, Object Pool, Composition root (`NovaForgeCore`).
 `NovaForgeApp`, `UnityLogSink`, `UnityStorage`, `UnityHttpTransport`, `SafeAreaFitter`.
 Yalnızca uzun süredir kararlı API'ler kullanıldı ama **Unity'de ilk import'ta derlenmesi doğrulanmalı.**
 
+## Reklam ağı — AdMob ⚠️ (yazıldı, doğrulanmadı)
+Karar: AdMob ile başla, ölçeklenince AppLovin MAX ile A/B. `NovaForge.Ads.AdMob` adaptörü (UMP consent, rewarded, interstitial,
+banner, gelir olayı, test/production ID koruması) resmi dokümana göre yazıldı; Unity + `com.google.ads.mobile` 11.x ile derlenip cihazda test edilmeli.
+
 ## Sıradaki fazlar (yapılmadı)
 | Faz | İçerik | Ön koşul |
 |---|---|---|
 | 2 | Unity projesi kurulumu, Core'un Unity Test Runner'da çalıştırılması, Unity köprüsünün doğrulanması | Unity 6.3 LTS kurulumu |
 | 3 | UI framework (ScreenManager, PopupManager, Navigation, ekranlar, tema), Audio (pooling, mixer), Input (tap/swipe/drag/long-press), Scene transitions, Addressables | Faz 2 |
-| 4 | SDK adaptörleri: Unity IAP 5.x, reklam ağı (AdMob veya LevelPlay — karar gerekli), Firebase Analytics/Remote Config/Crashlytics, Google UMP + iOS ATT | Faz 2 + hesaplar |
+| 4 | SDK adaptörleri: Unity IAP 5.x, AdMob adaptörünün doğrulanması, Firebase Analytics/Remote Config/Crashlytics, Google UMP + iOS ATT | Faz 2 + hesaplar |
 | 5 | Editor araçları: NOVAFORGE menüsü, Create New Game, validators (config/monetization/localization), Level Editor, build config | Faz 3 |
 | 6 | Oyun şablonları (Puzzle, Arcade, Hypercasual, Idle, Simulation) | Faz 3-5 |
 | 7 | Referans oyun (tilt + renk karıştırma bulmacası), 30+ bölüm, solver ile çözülebilirlik doğrulaması | Faz 3-5 |

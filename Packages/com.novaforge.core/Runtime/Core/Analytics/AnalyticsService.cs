@@ -22,6 +22,8 @@ namespace NovaForge.Core.Analytics
         public const string RewardedAdRequested = "rewarded_ad_requested";
         public const string RewardedAdCompleted = "rewarded_ad_completed";
         public const string InterstitialAdShown = "interstitial_ad_shown";
+        /// <summary>Impression-level ad revenue (params: ad_format, value, currency). Same name as Firebase's standard event.</summary>
+        public const string AdImpression = "ad_impression";
         public const string PurchaseStarted = "purchase_started";
         public const string PurchaseCompleted = "purchase_completed";
         public const string PurchaseFailed = "purchase_failed";
@@ -43,6 +45,7 @@ namespace NovaForge.Core.Analytics
         public const string DurationSec = "duration_sec";
         public const string SessionNumber = "session_number";
         public const string DaysSinceInstall = "days_since_install";
+        public const string AdFormat = "ad_format";
     }
 
     /// <summary>
