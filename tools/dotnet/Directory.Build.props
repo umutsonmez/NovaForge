@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <!-- Mirror Unity's compiler constraints: C# 9, no nullable reference annotations. -->
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsNotAsErrors>CS1591</WarningsNotAsErrors>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <PackageRoot>$(MSBuildThisFileDirectory)../../Packages/com.novaforge.core/</PackageRoot>
+  </PropertyGroup>
+</Project>

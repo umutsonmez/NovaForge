@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Verification build for the engine-independent NovaForge.Core assembly.
+    Compiles the SAME source files Unity compiles (Runtime/Core), against netstandard2.1 like Unity does.
+    This lets CI and developers without a Unity license build and test the core logic.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>NovaForge.Core</AssemblyName>
+    <RootNamespace>NovaForge.Core</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(PackageRoot)Runtime/Core/**/*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Same major version as Unity's com.unity.nuget.newtonsoft-json package. -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+</Project>
