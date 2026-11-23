@@ -35,7 +35,7 @@ namespace NovaForge.Ads.AdMob
     /// Every SDK callback is marshalled to the Unity main thread with MobileAdsEventExecutor.ExecuteInUpdate
     /// (plugin 11.7 obsoleted MobileAds.RaiseAdEventsOnUnityMainThread).
     /// </summary>
-    public sealed class AdMobAdsProvider : IAdsProvider
+    public sealed class AdMobAdsProvider : IAdsProvider, IPrivacyOptionsProvider
     {
         private const string Tag = "AdMob";
         private const int MaxRetryDelaySeconds = 64;
@@ -104,6 +104,9 @@ namespace NovaForge.Ads.AdMob
         }
 
         /// <summary>Opens Google's privacy options form (call from a "Privacy settings" button when PrivacyOptionsRequired).</summary>
+        bool IPrivacyOptionsProvider.IsPrivacyOptionsRequired => PrivacyOptionsRequired;
+        Task<string> IPrivacyOptionsProvider.ShowPrivacyOptionsAsync() => ShowPrivacyOptionsFormAsync();
+
         public Task<string> ShowPrivacyOptionsFormAsync()
         {
             var tcs = new TaskCompletionSource<string>();
@@ -129,18 +132,18 @@ namespace NovaForge.Ads.AdMob
                 if (updateError != null)
                 {
                     // Google: consent from a previous session may still allow ads.
-                    tcs.TrySetResult(new AdMobConsentResult(ConsentInformation.CanRequestAds(), IsPrivacyOptionsRequired(), updateError.Message));
+                    tcs.TrySetResult(new AdMobConsentResult(ConsentInformation.CanRequestAds(), QueryPrivacyOptionsRequired(), updateError.Message));
                     return;
                 }
                 ConsentForm.LoadAndShowConsentFormIfRequired(formError => OnMain(() =>
                 {
-                    tcs.TrySetResult(new AdMobConsentResult(ConsentInformation.CanRequestAds(), IsPrivacyOptionsRequired(), formError?.Message));
+                    tcs.TrySetResult(new AdMobConsentResult(ConsentInformation.CanRequestAds(), QueryPrivacyOptionsRequired(), formError?.Message));
                 }));
             }));
             return tcs.Task;
         }
 
-        private static bool IsPrivacyOptionsRequired() =>
+        private static bool QueryPrivacyOptionsRequired() =>
             ConsentInformation.PrivacyOptionsRequirementStatus == PrivacyOptionsRequirementStatus.Required;
 
         private void ApplyRequestConfiguration()

@@ -12,6 +12,7 @@ using NovaForge.Core.Meta;
 using NovaForge.Core.Privacy;
 using NovaForge.Core.Progression;
 using NovaForge.Core.Purchasing;
+using NovaForge.Core.Settings;
 using NovaForge.Core.Shop;
 
 namespace NovaForge.Core
@@ -29,6 +30,12 @@ namespace NovaForge.Core
         /// <summary>Escape hatch for soft-launch without a validation backend. Logged loudly. Default false.</summary>
         public bool AllowInsecurePurchaseValidationInRelease;
         public LogLevel MinimumLogLevel = LogLevel.Info;
+        /// <summary>Device UI culture (e.g. "tr-TR"), used when the player hasn't chosen a language.</summary>
+        public string DeviceLanguage;
+        /// <summary>Localization tables: language code -> JSON text. Core and game tables can both be added.</summary>
+        public readonly List<KeyValuePair<string, string>> LocalizationTables = new List<KeyValuePair<string, string>>();
+        /// <summary>Consent platform's privacy-options entry point (e.g. the AdMob adapter). Optional.</summary>
+        public IPrivacyOptionsProvider PrivacyOptions;
         public readonly List<ILogSink> LogSinks = new List<ILogSink>();
         public readonly List<IErrorReportSink> ErrorSinks = new List<IErrorReportSink>();
 
@@ -81,6 +88,9 @@ namespace NovaForge.Core
         public AnalyticsService Analytics { get; }
         public SessionTracker Sessions { get; }
         public LocalizationService Localization { get; }
+        public PlayerSettingsService PlayerSettings { get; }
+        /// <summary>null when no consent platform provides privacy options.</summary>
+        public IPrivacyOptionsProvider PrivacyOptions { get; }
         public EconomyService Economy { get; }
         public RewardService Rewards { get; }
         public EntitlementService Entitlements { get; }
@@ -127,6 +137,11 @@ namespace NovaForge.Core
             foreach (var p in s.AnalyticsProviders) Analytics.AddProvider(p);
             Sessions = new SessionTracker(Saves, Analytics, Clock);
             Localization = new LocalizationService(Log, Events);
+            CoreStrings.AddTo(Localization);
+            foreach (var t in s.LocalizationTables) Localization.AddTableJson(t.Key, t.Value);
+            PlayerSettings = new PlayerSettingsService(Saves, Events);
+            Localization.SetLanguage(PlayerSettings.Language ?? Languages.Resolve(s.DeviceLanguage));
+            PrivacyOptions = s.PrivacyOptions;
 
             s.Economy.DayResetOffset = s.DayResetOffset;
             Economy = new EconomyService(s.Economy, Saves, Clock, Log, Events);
@@ -162,6 +177,8 @@ namespace NovaForge.Core
             _subs.Add(Events.Subscribe<AppResumed>(e => OnResumed(e)));
             _subs.Add(Events.Subscribe<AppQuitting>(_ => Sessions.EndSession()));
             _subs.Add(Events.Subscribe<RewardGranted>(e => CountCoins(e)));
+            _subs.Add(Events.Subscribe<PlayerSettingsChanged>(e =>
+                Localization.SetLanguage(e.Settings.Language ?? Languages.Resolve(_setup.DeviceLanguage))));
         }
 
         /// <summary>Validates the setup (including release-build safety rules) and builds all services.</summary>
@@ -191,6 +208,10 @@ namespace NovaForge.Core
                 if (s.PurchaseProvider is MockPurchaseProvider) p.Add("MockPurchaseProvider must not ship in a release build.");
                 if (s.PurchaseValidator != null && !s.PurchaseValidator.IsSecureForProduction && !s.AllowInsecurePurchaseValidationInRelease)
                     p.Add($"{s.PurchaseValidator.GetType().Name} is not secure for production. Use ServerPurchaseValidator.");
+                // Both stores require a privacy policy for apps with ads / IAP / analytics. Ship it locally (remote may override).
+                if (s.LocalConfig == null || !s.LocalConfig.TryGetValue(CoreConfig.PrivacyPolicyUrl, out var url)
+                    || !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    p.Add($"LocalConfig must set '{CoreConfig.PrivacyPolicyUrl}' to an https:// URL in release builds.");
             }
 
             if (s.Economy != null)
@@ -286,7 +307,7 @@ namespace NovaForge.Core
             _registry.RegisterInstance(Clock).RegisterInstance(Log).RegisterInstance(Errors).RegisterInstance(Events)
                 .RegisterInstance(Lifecycle).RegisterInstance(Saves).RegisterInstance(Config).RegisterInstance<IConfig>(Config)
                 .RegisterInstance(Consent).RegisterInstance<IConsent>(Consent).RegisterInstance(Analytics).RegisterInstance<IAnalytics>(Analytics)
-                .RegisterInstance(Localization).RegisterInstance<ILocalization>(Localization)
+                .RegisterInstance(Localization).RegisterInstance<ILocalization>(Localization).RegisterInstance(PlayerSettings)
                 .RegisterInstance(Economy).RegisterInstance<IWallet>(Economy).RegisterInstance(Rewards).RegisterInstance<IRewardService>(Rewards)
                 .RegisterInstance(Entitlements).RegisterInstance<IEntitlements>(Entitlements)
                 .RegisterInstance(Statistics).RegisterInstance<IStatistics>(Statistics).RegisterInstance(Progression)

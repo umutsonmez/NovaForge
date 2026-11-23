@@ -3,6 +3,13 @@ All notable changes to `com.novaforge.core` are documented here. Format: [Keep a
 
 ## [Unreleased]
 ### Added
+- UI framework: engine-independent `NavigationService` (screen stack, popup stack, priority popup queue, back-button policy,
+  serialized transitions), `PlayerSettingsService`, `CoreStrings` (8 languages), `IPrivacyOptionsProvider`.
+- `NovaForge.UI` assembly (uGUI 2.0 + TMP): `UIView`, `UIManager`, `ConfirmPopup`, `SettingsView`, `LocalizedText`, `CurrencyDisplay`.
+- `NovaForge.Editor`: NOVAFORGE ▸ UI menu (UI root, screen, popup, confirm popup, settings popup builders).
+- PlayMode tests (`NovaForge.UI.Tests`).
+- Config keys `privacy.policy_url`, `privacy.terms_url`, `support.email`; release validation requires an https privacy policy URL.
+- `AdMobAdsProvider` implements `IPrivacyOptionsProvider`.
 - `NovaForge.Ads.AdMob` adapter (Google Mobile Ads Unity plugin 11.x): UMP consent flow, rewarded/interstitial/banner,
   impression revenue event, test-vs-production ad unit guard. Compiles only when `com.google.ads.mobile` >= 11.0.0 is installed.
   Verified to compile with 11.7.0 in Unity 6000.3.29f1; SDK callbacks marshalled via `MobileAdsEventExecutor.ExecuteInUpdate`.

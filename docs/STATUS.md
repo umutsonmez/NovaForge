@@ -21,11 +21,16 @@ Localization, Object Pool, Composition root (`NovaForgeCore`).
 Karar: AdMob ile başla, ölçeklenince AppLovin MAX ile A/B. `NovaForge.Ads.AdMob` adaptörü `com.google.ads.mobile` 11.7.0 ile
 uyarısız derleniyor. Gerçek cihazda (Android cihaz/emülatör) test reklamları + UMP formu ile denenmesi gerekiyor.
 
+## Faz 3a — UI framework ✅ (doğrulandı)
+Detay: [UI_FRAMEWORK.md](UI_FRAMEWORK.md). `NavigationService` (ekran/popup yığını, popup kuyruğu, geri tuşu, serileştirme),
+`PlayerSettingsService`, 8 dilde `CoreStrings`, `UIView`/`UIManager`, `ConfirmPopup`, `SettingsView`, `LocalizedText`,
+`CurrencyDisplay`, `NOVAFORGE ▸ UI` editor menüsü. Testler: EditMode 117/117, PlayMode 5/5 (Unity 6000.3.29f1), dotnet 117/117.
+
 ## Sıradaki fazlar (yapılmadı)
 | Faz | İçerik | Ön koşul |
 |---|---|---|
 | 2 | ✅ Sandbox projesi, Core testleri Unity'de, Unity köprüsü + AdMob derlemesi | — |
-| 3 | UI framework (ScreenManager, PopupManager, Navigation, ekranlar, tema), Audio (pooling, mixer), Input (tap/swipe/drag/long-press), Scene transitions, Addressables | Faz 2 |
+| 3 | ✅ UI framework çekirdeği. Kalan: hazır shop/günlük ödül/kazan-kaybet ekranları, tema; Audio (pooling, mixer), Input (tap/swipe/drag/long-press), Scene transitions, Addressables | Faz 2 |
 | 4 | SDK adaptörleri: Unity IAP 5.x, AdMob cihaz testi, Firebase Analytics/Remote Config/Crashlytics, Google UMP + iOS ATT | Faz 2 + hesaplar |
 | 5 | Editor araçları: NOVAFORGE menüsü, Create New Game, validators (config/monetization/localization), Level Editor, build config | Faz 3 |
 | 6 | Oyun şablonları (Puzzle, Arcade, Hypercasual, Idle, Simulation) | Faz 3-5 |

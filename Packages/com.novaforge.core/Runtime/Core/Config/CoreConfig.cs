@@ -26,6 +26,9 @@ namespace NovaForge.Core.Config
 
         public const string RemoteConfigTimeoutSeconds = "remote_config.timeout_seconds";
         public const string PolicyVersion = "privacy.policy_version";
+        public const string PrivacyPolicyUrl = "privacy.policy_url";
+        public const string TermsUrl = "privacy.terms_url";
+        public const string SupportEmail = "support.email";
 
         /// <summary>Adds all Core keys to a schema.</summary>
         public static ConfigSchema AddCoreEntries(this ConfigSchema schema)
@@ -48,7 +51,10 @@ namespace NovaForge.Core.Config
                 .Json(DailyRewardsSchedule, "[{\"coin\":50},{\"coin\":75},{\"coin\":100},{\"coin\":150},{\"coin\":200},{\"coin\":250},{\"coin\":500}]",
                     "Array of day entries; each maps resourceId -> amount.")
                 .Float(RemoteConfigTimeoutSeconds, 4, 1, 30)
-                .String(PolicyVersion, "1", null, 32);
+                .String(PolicyVersion, "1", null, 32)
+                .String(PrivacyPolicyUrl, "", null, 256, "Must be set per game before release (store requirement).")
+                .String(TermsUrl, "", null, 256)
+                .String(SupportEmail, "", null, 128);
         }
     }
 }
