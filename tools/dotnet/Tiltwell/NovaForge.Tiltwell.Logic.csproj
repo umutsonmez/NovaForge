@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Same sources Unity compiles for the reference game's engine-free logic. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>NovaForge.Tiltwell.Logic</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GameRoot>$(MSBuildThisFileDirectory)../../../Packages/com.novaforge.tiltwell/</GameRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(GameRoot)Runtime/Logic/**/*.cs" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+</Project>

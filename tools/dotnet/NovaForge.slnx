@@ -5,4 +5,9 @@
   <Folder Name="/Tests/">
     <Project Path="Tests/NovaForge.Core.Tests.csproj" />
   </Folder>
+  <Folder Name="/Tiltwell/">
+    <Project Path="Tiltwell/NovaForge.Tiltwell.Logic.csproj" />
+    <Project Path="TiltwellTests/NovaForge.Tiltwell.Tests.csproj" />
+    <Project Path="TiltwellGen/NovaForge.Tiltwell.Gen.csproj" />
+  </Folder>
 </Solution>

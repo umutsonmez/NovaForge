@@ -1,0 +1,13 @@
+{
+  "name": "com.novaforge.tiltwell",
+  "version": "0.1.0",
+  "displayName": "Tiltwell (NovaForge reference game)",
+  "description": "Reference game built on NovaForge Core: tilt the board, mix paint droplets, fill the wells. Working title, not trademark-cleared.",
+  "unity": "6000.0",
+  "author": { "name": "NovaForge" },
+  "dependencies": {
+    "com.novaforge.core": "0.1.0",
+    "com.unity.nuget.newtonsoft-json": "3.2.2",
+    "com.unity.ugui": "2.0.0"
+  }
+}

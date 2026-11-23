@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GameRoot>$(MSBuildThisFileDirectory)../../../Packages/com.novaforge.tiltwell/</GameRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(GameRoot)Tests/Editor/**/*.cs" />
+    <!-- The shipped level pack is validated by the tests. -->
+    <None Include="$(GameRoot)Runtime/Levels/levels.json" Link="levels.json" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="../Tiltwell/NovaForge.Tiltwell.Logic.csproj" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+</Project>

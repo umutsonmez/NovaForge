@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Regenerates the shipped level pack. Usage: dotnet run [seed] [output.json] -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Tiltwell/NovaForge.Tiltwell.Logic.csproj" />
+  </ItemGroup>
+</Project>
