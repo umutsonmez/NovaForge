@@ -24,6 +24,7 @@
 - World chest:
   - `WorldChest`, `WorldChestState` and the `WorldChestView` popup, opened from `OnResultChosen` when a world is cleared.
   - Chest icon on the map banners.
+- `TiltwellArtBuilder`: renders the app icon and the store feature graphic from the game's own visuals, and sets the player icon.
 - Drop skins:
   - `DropSkin`, `DropSkins` and `SkinState`.
   - `DropVisual`, shared by `BoardView` and the shop.

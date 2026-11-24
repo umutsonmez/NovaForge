@@ -66,6 +66,13 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 - Çizim `DropVisual.Create` ile yapılır, tahta ve mağaza aynı kodu kullanır. Sadece gövde renklenir, bu yüzden birleşme ve boya renk değişimi her görünümde çalışır.
 - Elmas şekli boya karolarına ayrıldı; damla görünümlerinde kullanılmaz.
 
+## Simge ve mağaza görselleri
+- `TiltwellArtBuilder` (menü: NOVAFORGE ▸ Tiltwell ▸ Regenerate App Icon and Store Art) üretir:
+  - `Assets/Tiltwell/Art/AppIcon.png`, varsayılan oyuncu simgesi olarak atanır.
+  - `docs/store/icon-512.png`
+  - `docs/store/feature-1024x500.png`
+- Ekran görüntüleri ve mağaza metni taslağı: `docs/store/README.md`.
+
 ## Ses ve titreşim
 - Tüm sesler kodla sentezlenir (`Editor/TiltwellSoundBuilder`, menü NOVAFORGE ▸ Tiltwell ▸ Regenerate Sounds). Çıktı `Runtime/Audio/*.wav` ve `TiltwellAudio.asset`; üçüncü parti ses yok, lisans derdi yok.
 - Efektler: tıklama, popup, kayma, duvara çarpma, birleşme, kuyuya girme, deliğe düşme, coin, kazanma, kaybetme. Müzik: 20 sn'lik dikişsiz döngü (C–Am–F–G, 96 bpm).
