@@ -34,6 +34,9 @@ namespace NovaForge.Tiltwell.Unity
         public const string DailyDoneTitle = "tiltwell.daily_done_title";
         public const string DailyDoneText = "tiltwell.daily_done_text";
         public const string DailyComeBack = "tiltwell.daily_come_back";
+        public const string WorldDone = "tiltwell.world_done";
+        public const string ChestText = "tiltwell.chest_text";
+        public const string Collect = "tiltwell.collect";
 
         private static readonly string[] Keys =
         {
@@ -43,6 +46,7 @@ namespace NovaForge.Tiltwell.Unity
             WorldN, TutorialBrown, ColorGuideTitle, ColorGuideText, GotIt,
             TutorialSticky, TutorialArrow, TutorialPaint,
             DailyPuzzle, DailyDoneTitle, DailyDoneText, DailyComeBack,
+            WorldDone, ChestText, Collect,
         };
 
         private static readonly Dictionary<string, string[]> Values = new Dictionary<string, string[]>
@@ -63,6 +67,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Arrow tiles are one-way: drops can only cross them in the arrow's direction.",
                 "A drop that slides over a paint tile picks up its color.",
                 "Puzzle", "Daily puzzle solved!", "+{0} coins · Streak: {1} days", "You solved today's puzzle. A new one arrives tomorrow.",
+                "World {0} complete!", "You opened the world chest:", "Collect",
             },
             [Languages.Turkish] = new[]
             {
@@ -80,6 +85,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Oklu karelerden sadece ok yönünde geçilebilir.",
                 "Boya karosunun üstünden geçen damla o rengi alır.",
                 "Bulmaca", "Günün bulmacası çözüldü!", "+{0} altın · Seri: {1} gün", "Bugünün bulmacasını çözdün. Yenisi yarın gelir.",
+                "Dünya {0} tamamlandı!", "Dünya sandığını açtın:", "Topla",
             },
             [Languages.German] = new[]
             {
@@ -97,6 +103,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Pfeilfelder sind Einbahnstraßen: Tropfen kommen nur in Pfeilrichtung durch.",
                 "Ein Tropfen, der über ein Farbfeld rutscht, nimmt dessen Farbe an.",
                 "Rätsel", "Tagesrätsel gelöst!", "+{0} Münzen · Serie: {1} Tage", "Du hast das heutige Rätsel gelöst. Morgen kommt ein neues.",
+                "Welt {0} geschafft!", "Du hast die Weltentruhe geöffnet:", "Einsammeln",
             },
             [Languages.French] = new[]
             {
@@ -114,6 +121,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Les cases fléchées sont à sens unique : on ne les traverse que dans le sens de la flèche.",
                 "Une goutte qui glisse sur une case de peinture prend sa couleur.",
                 "Énigme", "Énigme du jour résolue !", "+{0} pièces · Série : {1} jours", "Vous avez résolu l'énigme du jour. Une nouvelle arrive demain.",
+                "Monde {0} terminé !", "Vous avez ouvert le coffre du monde :", "Récupérer",
             },
             [Languages.Spanish] = new[]
             {
@@ -131,6 +139,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Las casillas con flecha son de un solo sentido: solo se cruzan en la dirección de la flecha.",
                 "Una gota que pasa sobre una casilla de pintura toma su color.",
                 "Puzle", "¡Puzle del día resuelto!", "+{0} monedas · Racha: {1} días", "Ya resolviste el puzle de hoy. Mañana llega otro.",
+                "¡Mundo {0} completado!", "Abriste el cofre del mundo:", "Recoger",
             },
             [Languages.Portuguese] = new[]
             {
@@ -148,6 +157,7 @@ namespace NovaForge.Tiltwell.Unity
                 "As casas com seta são de mão única: só dá para passar na direção da seta.",
                 "Uma gota que passa sobre uma casa de tinta pega a cor dela.",
                 "Desafio", "Desafio do dia resolvido!", "+{0} moedas · Sequência: {1} dias", "Você resolveu o desafio de hoje. Amanhã tem outro.",
+                "Mundo {0} concluído!", "Você abriu o baú do mundo:", "Coletar",
             },
             [Languages.Japanese] = new[]
             {
@@ -165,6 +175,7 @@ namespace NovaForge.Tiltwell.Unity
                 "矢印のマスは一方通行。矢印の向きにしか通れません。",
                 "ペンキのマスを通ったしずくはその色に染まります。",
                 "パズル", "今日のパズルクリア！", "+{0}コイン · 連続{1}日", "今日のパズルはクリア済み。明日また新しいパズルが届きます。",
+                "ワールド{0}クリア！", "ワールドの宝箱を開けました：", "受け取る",
             },
             [Languages.Korean] = new[]
             {
@@ -182,6 +193,7 @@ namespace NovaForge.Tiltwell.Unity
                 "화살표 칸은 일방통행이에요. 화살표 방향으로만 지나갈 수 있어요.",
                 "물감 칸을 지나간 물방울은 그 색을 띱니다.",
                 "퍼즐", "오늘의 퍼즐 완료!", "+{0} 코인 · 연속 {1}일", "오늘의 퍼즐을 풀었어요. 내일 새 퍼즐이 나와요.",
+                "월드 {0} 완료!", "월드 상자를 열었어요:", "받기",
             },
         };
 

@@ -438,4 +438,32 @@ namespace NovaForge.Tiltwell.Tests
             Assert.AreEqual(100, DailyPuzzle.Reward(30));
         }
     }
+
+    public class WorldChestTests
+    {
+        [Test]
+        public void WorldComplete_OnlyWhenEveryLevelOfTheTierIsDone()
+        {
+            var levels = new List<LevelData>
+            {
+                new LevelData { Id = "a", Tier = 1 }, new LevelData { Id = "b", Tier = 1 }, new LevelData { Id = "c", Tier = 2 },
+            };
+            var done = new HashSet<string> { "a" };
+            Assert.IsFalse(WorldChest.IsWorldComplete(levels, 1, done.Contains));
+            done.Add("b");
+            Assert.IsTrue(WorldChest.IsWorldComplete(levels, 1, done.Contains));
+            Assert.IsFalse(WorldChest.IsWorldComplete(levels, 2, done.Contains));
+            Assert.IsFalse(WorldChest.IsWorldComplete(levels, 9, done.Contains), "unknown world");
+        }
+
+        [Test]
+        public void Chest_OpensOnce_AndGrowsWithTheWorld()
+        {
+            var s = new WorldChestState();
+            Assert.IsTrue(s.Open(3));
+            Assert.IsFalse(s.Open(3));
+            Assert.Greater(WorldChest.Reward(10).coins, WorldChest.Reward(1).coins);
+            Assert.GreaterOrEqual(WorldChest.Reward(1).hints, 1);
+        }
+    }
 }

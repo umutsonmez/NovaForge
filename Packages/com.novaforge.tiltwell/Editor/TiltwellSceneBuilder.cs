@@ -84,6 +84,7 @@ namespace NovaForge.Tiltwell.Editor
             UIMenu.CreateLevelResultPopup();
             UIMenu.CreateDailyRewardPopup();
             BuildColorGuide();
+            BuildWorldChest();
 
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -324,6 +325,12 @@ namespace NovaForge.Tiltwell.Editor
             var bannerText = UIMenu.Text(bannerFace, "Text", "World 1", 50, FontStyles.Bold, 104);
             UIMenu.Stretch(bannerText.gameObject, bannerFace);
             UIMenu.OnColor(bannerText);
+            bannerText.rectTransform.offsetMax = new Vector2(-70, 0);
+            bannerText.rectTransform.offsetMin = new Vector2(30, 0);
+            var chestIcon = UIMenu.Icon(bannerFace, "Chest", UIIcons.Gift, 58, Color.white);
+            UIMenu.Place(chestIcon.rectTransform, new Vector2(1, 0.5f), new Vector2(-28, 0), new Vector2(64, 64));
+            chestIcon.rectTransform.pivot = new Vector2(1, 0.5f);
+            chestIcon.rectTransform.anchoredPosition = new Vector2(-28, 0);
 
             var node = NodeTemplate(content);
 
@@ -336,10 +343,16 @@ namespace NovaForge.Tiltwell.Editor
             fade.gameObject.AddComponent<UIGradient>().Set(T.backgroundTop, UIMenu.WithAlpha(T.backgroundTop, 0f));
             var back = UIMenu.IconButton(t, "Back", UIIcons.Back, UIButtonStyle.Secondary, 112);
             UIMenu.Place((RectTransform)back.transform, new Vector2(0, 1), new Vector2(36, -34), new Vector2(112, 112));
-            var titleCard = UIMenu.Card(t, "TitlePill", new Vector2(440, 104), Color.white, 52, out var titleFace);
-            UIMenu.Place((RectTransform)titleCard, new Vector2(0.5f, 1), new Vector2(0, -38), new Vector2(440, 104));
-            var title = UIMenu.Text(titleFace, "Title", "Levels", 54, FontStyles.Bold, 104);
+            // Title sits right of the back button so it can never run into the star chip on narrow canvases.
+            var titleCard = UIMenu.Card(t, "TitlePill", new Vector2(340, 104), Color.white, 52, out var titleFace);
+            UIMenu.Place((RectTransform)titleCard, new Vector2(0, 1), new Vector2(170, -38), new Vector2(340, 104));
+            var title = UIMenu.Text(titleFace, "Title", "Levels", 50, FontStyles.Bold, 104);
             UIMenu.Stretch(title.gameObject, titleFace);
+            title.rectTransform.offsetMin = new Vector2(20, 0);
+            title.rectTransform.offsetMax = new Vector2(-20, 0);
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 30;
+            title.fontSizeMax = 50;
             UIMenu.Localized(title, TiltwellStrings.Levels);
             var stars = UIMenu.Chip(t, "StarChip", UIIcons.Star, T.accentTop, T.accentBottom, 250);
             UIMenu.Place(UIMenu.ChipRoot(stars), new Vector2(1, 1), new Vector2(-36, -40), new Vector2(250, 100));
@@ -606,6 +619,55 @@ namespace NovaForge.Tiltwell.Editor
             }
             so.FindProperty("okButton").objectReferenceValue = ok;
             so.FindProperty("panel").objectReferenceValue = panelRoot;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void BuildWorldChest()
+        {
+            var view = UIMenu.CreateView<WorldChestView>("WorldChestPopup", UIViewKind.Popup, TiltwellViewIds.WorldChest);
+            var panel = UIMenu.CreatePanel(view.transform, new Vector2(880, 980));
+            var layout = UIMenu.VerticalPadded(panel, 56, 60, 56, 24);
+            var title = UIMenu.Text(layout, "Title", "World 1 complete!", 60, FontStyles.Bold, 90);
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 40;
+            title.fontSizeMax = 60;
+
+            // Big gift bubble that pops in.
+            var holder = new GameObject("ChestHolder", typeof(RectTransform), typeof(LayoutElement));
+            holder.transform.SetParent(layout, false);
+            holder.GetComponent<LayoutElement>().preferredHeight = 300;
+            var bubble = UIMenu.IconBubble(holder.transform, "Chest", UIIcons.Gift, T.accentTop, T.accentBottom, 260);
+            bubble.GetComponent<LayoutElement>().ignoreLayout = true;
+            UIMenu.Place(bubble.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(260, 260));
+            var pop = bubble.gameObject.AddComponent<UIPopIn>();
+            bubble.gameObject.AddComponent<UIFloat>();
+
+            var sub = UIMenu.Text(layout, "Subtitle", "", 40, FontStyles.Normal, 70);
+            sub.color = T.textMuted;
+            UIMenu.Localized(sub, TiltwellStrings.ChestText);
+            var row = UIMenu.HRow(layout, "Rewards", 110, 40);
+            row.GetComponent<HorizontalLayoutGroup>().childForceExpandWidth = false;
+            row.GetComponent<HorizontalLayoutGroup>().childForceExpandHeight = false;
+            UIMenu.IconBubble(row, "CoinIcon", UIIcons.Coin, T.accentTop, T.accentBottom, 92);
+            var coins = UIMenu.Text(row, "Coins", "+150", 56, FontStyles.Bold, 110);
+            coins.GetComponent<LayoutElement>().preferredWidth = 190;
+            UIMenu.IconBubble(row, "HintIcon", UIIcons.Lightbulb, T.primaryTop, T.primaryBottom, 92);
+            var hints = UIMenu.Text(row, "Hints", "+1", 56, FontStyles.Bold, 110);
+            hints.GetComponent<LayoutElement>().preferredWidth = 120;
+            UIMenu.Spacer(layout, 6);
+            var collect = UIMenu.Button(layout, "Collect", TiltwellStrings.Collect, out _, UIButtonStyle.Success, UIIcons.Check, 140);
+
+            var confettiGo = new GameObject("Confetti", typeof(RectTransform), typeof(ConfettiBurst));
+            confettiGo.transform.SetParent(view.transform, false);
+            UIMenu.Place((RectTransform)confettiGo.transform, new Vector2(0.5f, 0.5f), new Vector2(0, 300), Vector2.zero);
+
+            var so = new SerializedObject(view);
+            so.FindProperty("title").objectReferenceValue = title;
+            so.FindProperty("coinsLabel").objectReferenceValue = coins;
+            so.FindProperty("hintsLabel").objectReferenceValue = hints;
+            so.FindProperty("collectButton").objectReferenceValue = collect;
+            so.FindProperty("confetti").objectReferenceValue = confettiGo.GetComponent<ConfettiBurst>();
+            so.FindProperty("chestPop").objectReferenceValue = pop;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 

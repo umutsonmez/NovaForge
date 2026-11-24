@@ -54,6 +54,11 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 - Çözünce `30 + 10 × seri` altın verir (seri en fazla 7 sayılır). Seri art arda günlerde artar, bir gün kaçarsa 1'e döner (`DailyPuzzleState`, kayıt slotu `tiltwell_daily`).
 - Bölüm ilerlemesine sayılmaz. Hamle bitince kaybetme ekranı çıkmaz; baştan başlanır.
 
+## Dünya sandığı
+- Bir dünyanın bütün bölümleri bitince, sonuç ekranından sonra "Dünya N tamamlandı!" popup'ı (`world_chest`) açılır. Konfeti, kazanma sesi ve titreşim eşlik eder.
+- Ödül: `100 + 50 × dünya` altın ve `1 + dünya / 3` ipucu (`WorldChest.Reward`). Bir kez verilir; açılan sandıklar `tiltwell_chests` slotunda saklanır.
+- Haritadaki dünya afişinin sağında hediye ikonu durur; sandık açılınca tik işaretine döner.
+
 ## Ses ve titreşim
 - Tüm sesler kodla sentezlenir (`Editor/TiltwellSoundBuilder`, menü NOVAFORGE ▸ Tiltwell ▸ Regenerate Sounds). Çıktı `Runtime/Audio/*.wav` ve `TiltwellAudio.asset`; üçüncü parti ses yok, lisans derdi yok.
 - Efektler: tıklama, popup, kayma, duvara çarpma, birleşme, kuyuya girme, deliğe düşme, coin, kazanma, kaybetme. Müzik: 20 sn'lik dikişsiz döngü (C–Am–F–G, 96 bpm).
@@ -65,7 +70,7 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 Release build için `privacyPolicyUrl` (https) zorunlu; yoksa Core doğrulaması başlatmayı durdurur.
 
 ## Testler
-- dotnet: 31 test (kural, solver, oturum, renk tarifi, özel zemin, günlük bulmaca).
+- dotnet: 33 test (kural, solver, oturum, renk tarifi, özel zemin, günlük bulmaca, dünya sandığı).
 - Unity PlayMode `TiltwellPlayTests`: gerçek sahne; günlük ödül popup'ı → Play → bölüm 1'i solver hamleleriyle çöz → 3 yıldız + coin → Next ile bölüm 2. Ayrıca geri al ve ipucu harcama.
 
 ## Eksikler (dürüst liste)

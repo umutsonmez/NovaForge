@@ -43,6 +43,10 @@ namespace NovaForge.Tiltwell.Unity
         private NovaForge.Core.Data.SaveSlot<DailyPuzzleState> _dailySlot;
         private System.Threading.Tasks.Task<LevelData> _dailyTask;
         private int _dailyTaskDay;
+        private NovaForge.Core.Data.SaveSlot<WorldChestState> _chestSlot;
+
+        /// <summary>Opened world chests (loaded when Core is ready).</summary>
+        public WorldChestState Chests { get; private set; } = new WorldChestState();
 
         /// <summary>Daily puzzle streak (loaded when Core is ready).</summary>
         public DailyPuzzleState Daily { get; private set; } = new DailyPuzzleState();
@@ -121,6 +125,8 @@ namespace NovaForge.Tiltwell.Unity
             _dailySlot = new NovaForge.Core.Data.SaveSlot<DailyPuzzleState>(core.Saves, "tiltwell_daily", 1, () => new DailyPuzzleState());
             Daily = _dailySlot.Load().Data;
             GetDailyAsync(Today); // warm up: generate today's puzzle in the background
+            _chestSlot = new NovaForge.Core.Data.SaveSlot<WorldChestState>(core.Saves, "tiltwell_chests", 1, () => new WorldChestState());
+            Chests = _chestSlot.Load().Data;
             IsReady = true;
             if (UIManager.Instance != null) UIManager.Instance.Navigation.ResetToAsync(ViewIds.MainMenu).Forget();
         }
@@ -153,6 +159,27 @@ namespace NovaForge.Tiltwell.Unity
             return Core.Economy.Apply(tx) == TransactionStatus.Success ? coins : 0;
         }
 
+        public bool IsLevelCompleted(string id) => (Core.Progression.Get(id)?.BestStars ?? 0) > 0;
+
+        /// <summary>Tier whose chest should open now that <paramref name="levelId"/> was won, or null.</summary>
+        public int? ChestReadyAfter(string levelId)
+        {
+            var level = Levels.Find(l => l.Id == levelId);
+            if (level == null || Chests.IsOpened(level.Tier)) return null;
+            return WorldChest.IsWorldComplete(Levels, level.Tier, IsLevelCompleted) ? level.Tier : (int?)null;
+        }
+
+        /// <summary>Opens a world chest once: saves it and credits coins and hints. False if already open.</summary>
+        public bool OpenChest(int tier)
+        {
+            if (!Chests.Open(tier)) return false;
+            _chestSlot?.Save(Chests);
+            var (coins, hints) = WorldChest.Reward(tier);
+            var tx = new EconomyTransaction("world_chest:" + tier, "world_chest").Credit("coin", coins).Credit(TiltwellIds.Hint, hints);
+            Core.Economy.Apply(tx);
+            return true;
+        }
+
         /// <summary>First level not completed yet (or the last level when everything is done).</summary>
         public string NextPlayableLevelId()
         {
@@ -168,6 +195,11 @@ namespace NovaForge.Tiltwell.Unity
                 // Interstitials only at natural breaks, and AdPolicy decides (first levels, frequency, no_ads...).
                 if (Core.Ads != null) await Core.Ads.TryShowInterstitialAsync(AdPlacements.LevelEnd);
                 var nav = UIManager.Instance.Navigation;
+                if (ChestReadyAfter(e.LevelId) is int tier && OpenChest(tier))
+                {
+                    await nav.ShowPopupAsync(TiltwellViewIds.WorldChest, tier, dismissible: false);
+                    while (this != null && nav.IsPopupOpen(TiltwellViewIds.WorldChest)) await Awaitable.NextFrameAsync();
+                }
                 switch (e.Choice)
                 {
                     case LevelResultChoice.Retry:

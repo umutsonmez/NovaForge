@@ -12,6 +12,7 @@ namespace NovaForge.Tiltwell.Unity
     {
         public const string Levels = "levels";
         public const string ColorGuide = "color_guide";
+        public const string WorldChest = "world_chest";
     }
 
     /// <summary>
@@ -121,8 +122,16 @@ namespace NovaForge.Tiltwell.Unity
                     banner.anchoredPosition = new Vector2(0, points[i].y - spacing * 0.5f - (i == 0 ? 40f : worldGap * 0.15f));
                     var bg = banner.GetComponentInChildren<UIGradient>(true);
                     if (bg != null) bg.Set(worldTop[w], worldBottom[w]);
-                    var text = banner.GetComponentInChildren<TMP_Text>(true);
+                    TMP_Text text = null, chest = null;
+                    foreach (var t in banner.GetComponentsInChildren<TMP_Text>(true))
+                        if (t.name == "Chest") chest = t; else if (text == null) text = t;
                     if (text != null) text.text = Core.Localization.Format(TiltwellStrings.WorldN, WorldNumber(tiers[i]));
+                    if (chest != null)
+                    {
+                        bool opened = app.Chests.IsOpened(tiers[i]);
+                        chest.text = opened ? UIIcons.Check : UIIcons.Gift;
+                        chest.alpha = opened ? 0.75f : 1f;
+                    }
                 }
             }
 
