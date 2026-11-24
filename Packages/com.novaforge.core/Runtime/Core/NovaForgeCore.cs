@@ -257,11 +257,19 @@ namespace NovaForge.Core
                 catch (Exception ex) { Errors.Report(ex, "Core.Init purchases"); }
             }
 
-            if (Ads != null)
-            {
-                try { await Ads.InitializeAsync(); }
-                catch (Exception ex) { Errors.Report(ex, "Core.Init ads"); }
-            }
+            // Ads start in the background: consent forms and SDK start-up depend on the network and third-party
+            // callbacks that may never arrive. The game must become playable regardless; ads simply report
+            // "not available" until they are ready (AdsService checks IsInitialized everywhere).
+            if (Ads != null) AdsInitialization = InitializeAdsAsync();
+        }
+
+        /// <summary>Completes when the ads provider finished starting (or failed). Never faults.</summary>
+        public Task AdsInitialization { get; private set; } = Task.CompletedTask;
+
+        private async Task InitializeAdsAsync()
+        {
+            try { await Ads.InitializeAsync(); }
+            catch (Exception ex) { Errors.Report(ex, "Core.Init ads"); }
         }
 
         public void Dispose()

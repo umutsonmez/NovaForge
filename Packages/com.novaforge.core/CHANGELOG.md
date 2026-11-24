@@ -3,6 +3,7 @@ All notable changes to `com.novaforge.core` are documented here. Format: [Keep a
 
 ## [Unreleased]
 ### Changed
+- `NovaForgeCore.InitializeAsync` no longer waits for the ads provider: consent/SDK callbacks that never arrive (offline, editor) blocked the game from starting. New `AdsInitialization` task completes when ads are ready.
 - UI and Unity MonoBehaviours split into one file per class (`Widgets.cs`, `StandardViews.cs`, `GameViews.cs` removed): scene/prefab references to them now serialize.
 - `UIManager` missing-view error lists the known view ids.
 - `AudioService.PlayMusic` is silent when no `AudioLibrary` is assigned; `DailyRewardView` tolerates a torn-down Core.

@@ -75,9 +75,9 @@ Kaynak: https://developers.google.com/admob/unity/test-ads
 | Banner | `ca-app-pub-3940256099942544/6300978111` | `ca-app-pub-3940256099942544/2934735716` |
 
 ## Yayın öncesi kontrol listesi
-- [ ] AdMob hesabı, uygulama kaydı, ad unit'ler
-- [ ] `app-ads.txt` geliştirici web sitesinde yayında
-- [ ] AdMob → Privacy & messaging: GDPR mesajı (UMP) oluşturuldu ve yayında
+- [x] AdMob hesabı, uygulama kaydı, ad unit'ler (Tiltwell Android: 2026-11-24)
+- [x] `app-ads.txt` geliştirici web sitesinde yayında (https://umutsonmez.github.io/app-ads.txt; Play'de web sitesi bu alan adı olmalı)
+- [x] AdMob → Privacy & messaging: GDPR mesajı (UMP) oluşturuldu ve yayında
 - [ ] iOS: `NSUserTrackingUsageDescription`, ATT istemi, SKAdNetwork ID'leri (AdMob dokümanındaki liste)
 - [ ] Google Play Data safety formu ve App Store Privacy Nutrition Label reklam SDK'sına göre dolduruldu
 - [ ] Çocuklara yönelik ise: Families politikası, `AgeRestrictedTreatment.Child`, `MaxAdContentRating.G`

@@ -37,6 +37,43 @@ namespace NovaForge.Core.Tests
         }
 
         [Test]
+        public void Initialize_DoesNotWaitForAdsProvider_ThatNeverAnswers()
+        {
+            // Real case: UMP consent / SDK callbacks that never arrive (offline, editor placeholders).
+            var hanging = new HangingAdsProvider();
+            var setup = Setup(new InMemorySaveStorage(), new ManualClock(new DateTime(2026, 5, 1, 9, 0, 0, DateTimeKind.Utc)));
+            setup.AdsProvider = hanging;
+            var core = NovaForgeCore.Build(setup);
+
+            var init = core.InitializeAsync();
+            Assert.IsTrue(init.IsCompleted, "Core init must not block on ads");
+            Assert.IsFalse(core.AdsInitialization.IsCompleted);
+            Assert.IsFalse(core.Ads.IsRewardedAvailable(AdPlacements.Default), "no ads until the provider is ready");
+
+            hanging.Complete(true);
+            Assert.IsTrue(core.AdsInitialization.IsCompleted);
+            Assert.IsTrue(core.Ads.IsInitialized);
+            core.Dispose();
+        }
+
+        private sealed class HangingAdsProvider : IAdsProvider
+        {
+            private readonly System.Threading.Tasks.TaskCompletionSource<bool> _init = new System.Threading.Tasks.TaskCompletionSource<bool>();
+            public void Complete(bool ok) => _init.SetResult(ok);
+            public string Name => "hanging";
+            public System.Threading.Tasks.Task<bool> InitializeAsync(AdPrivacyOptions privacy) => _init.Task;
+            public void UpdatePrivacy(AdPrivacyOptions privacy) { }
+            public void LoadRewarded(string placement) { }
+            public void LoadInterstitial(string placement) { }
+            public bool IsRewardedReady(string placement) => true;
+            public bool IsInterstitialReady(string placement) => true;
+            public System.Threading.Tasks.Task<AdShowResult> ShowRewardedAsync(string placement) => throw new NotSupportedException();
+            public System.Threading.Tasks.Task<AdShowResult> ShowInterstitialAsync(string placement) => throw new NotSupportedException();
+            public void ShowBanner(string placement, BannerPosition position) { }
+            public void HideBanner() { }
+        }
+
+        [Test]
         public void FullFlow_PlayEarnSpendBuyRestart()
         {
             var storage = new InMemorySaveStorage();

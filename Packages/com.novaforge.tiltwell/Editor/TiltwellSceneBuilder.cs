@@ -23,6 +23,9 @@ namespace NovaForge.Tiltwell.Editor
         public const string LevelsPath = "Packages/com.novaforge.tiltwell/Runtime/Levels/levels.json";
         public const string PrivacyPolicyUrl = "https://umutsonmez.github.io/NovaForge/tiltwell/privacy.html";
         public const string SupportEmail = "tiltwell.support@gmail.com";
+        public const string BundleId = "com.umutsonmez.tiltwell";
+        /// <summary>Optional AdMobSettings asset (game data, not in the package). Missing = mock ads in development.</summary>
+        public const string AdMobSettingsPath = "Assets/Tiltwell/AdMobSettings.asset";
 
         [MenuItem("NOVAFORGE/Tiltwell/Build Game Scene", priority = 0)]
         public static void BuildScene()
@@ -44,6 +47,7 @@ namespace NovaForge.Tiltwell.Editor
                 ?? throw new FileNotFoundException(LevelsPath);
             appSo.FindProperty("privacyPolicyUrl").stringValue = PrivacyPolicyUrl;
             appSo.FindProperty("supportEmail").stringValue = SupportEmail;
+            appSo.FindProperty("adMobSettings").objectReferenceValue = AssetDatabase.LoadAssetAtPath<ScriptableObject>(AdMobSettingsPath);
             appSo.ApplyModifiedPropertiesWithoutUndo();
             appGo.AddComponent<AudioService>();
             appGo.SetActive(true);
@@ -68,6 +72,9 @@ namespace NovaForge.Tiltwell.Editor
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
 
             PlayerSettings.productName = "Tiltwell";
+            PlayerSettings.companyName = "Umut Sönmez";
+            PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Android, BundleId);
+            PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS, BundleId);
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             Debug.Log($"[Tiltwell] Scene built: {ScenePath}");
         }
