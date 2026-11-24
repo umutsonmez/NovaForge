@@ -11,6 +11,7 @@ namespace NovaForge.Tiltwell.Unity
     public static class TiltwellViewIds
     {
         public const string Levels = "levels";
+        public const string ColorGuide = "color_guide";
     }
 
     /// <summary>

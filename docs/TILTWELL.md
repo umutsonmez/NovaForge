@@ -26,6 +26,12 @@ Sahne elle yapılmaz; builder koddan üretir (`Assets/Tiltwell/Tiltwell.unity`) 
   Kilitli bölüm gri + kilit, geçilen bölüm yıldızlı, aktif bölümde nabız halkası + süzülen işaretçi. Açılışta aktif bölüme kayar.
 - **Oyun:** beyaz panelli tahta, kabarık duvarlar, derin delikler, parlayan kuyular, parlak/gölgeli damlalar, kayarken esneme,
   birleşme/teslimde parçacık. Üstte ev, bölüm ve hamle chip'leri, rozetli ipucu; altta geri al / baştan; mesaj balonu.
+- **Renk öğretimi:**
+  - Bölüm 1'de ve karışım gereken ilk bölümde her hamlede bedava yön oku çıkar.
+  - Karışım gereken ilk bölümde bir kez renk rehberi (`color_guide` popup'ı) açılır: kırmızı+sarı=turuncu, kırmızı+mavi=mor, sarı+mavi=yeşil.
+  - Kahverengi ilk çıktığında rehber kahverengi satırıyla tekrar açılır.
+  - Kademe 4'e kadar (ve kahverengi dünyasında) oyun ekranının üstünde, o bölümün tariflerini gösteren bir çubuk durur; dokununca rehber açılır.
+  - Rehberin "bir kez" gösterilmesi Core `TutorialService` ile kaydedilir (`color_mix`, `color_brown`).
 - Sonuç, günlük ödül, mağaza, ayarlar Core'un temalı ekranları (konfeti, sırayla yıldız).
 
 ## Bölümler
@@ -40,11 +46,10 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 Release build için `privacyPolicyUrl` (https) zorunlu; yoksa Core doğrulaması başlatmayı durdurur.
 
 ## Testler
-- dotnet: 22 kural/solver/oturum testi.
+- dotnet: 24 kural/solver/oturum/renk tarifi testi.
 - Unity PlayMode `TiltwellPlayTests`: gerçek sahne; günlük ödül popup'ı → Play → bölüm 1'i solver hamleleriyle çöz → 3 yıldız + coin → Next ile bölüm 2. Ayrıca geri al ve ipucu harcama.
 
 ## Eksikler (dürüst liste)
 - Ses dosyası yok: `AudioLibrary` atanmamış, oyun sessiz çalışır.
 - Uygulama ikonu, splash ve mağaza görselleri yok.
 - Japonca/Korece karakterler Nunito'da yok (Noto fallback gerekli).
-- Cihazda oynanmadı; dokunmatik his ve performans doğrulanmadı.

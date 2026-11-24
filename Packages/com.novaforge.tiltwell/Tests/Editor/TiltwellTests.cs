@@ -324,4 +324,25 @@ namespace NovaForge.Tiltwell.Tests
             }
         }
     }
+
+    public class ColorRecipeTests
+    {
+        [Test]
+        public void Ingredients_ArePrimariesOfTheMix()
+        {
+            CollectionAssert.AreEqual(new[] { Paint.Red, Paint.Yellow }, ColorRecipes.Ingredients(Paint.Orange));
+            CollectionAssert.AreEqual(new[] { Paint.Red, Paint.Blue }, ColorRecipes.Ingredients(Paint.Purple));
+            CollectionAssert.AreEqual(new[] { Paint.Yellow, Paint.Blue }, ColorRecipes.Ingredients(Paint.Green));
+            CollectionAssert.AreEqual(new[] { Paint.Red, Paint.Yellow, Paint.Blue }, ColorRecipes.Ingredients(Paint.Brown));
+            Assert.IsFalse(ColorRecipes.IsMixed(Paint.Red));
+            Assert.IsTrue(ColorRecipes.IsMixed(Paint.Brown));
+        }
+
+        [Test]
+        public void MixedWells_ListsDistinctMixedTargets_InTeachingOrder()
+        {
+            var level = new LevelData { Id = "t", Par = 1, Tier = 1, Rows = new[] { "#######", "#g.Rox#", "#Y.rkg#", "#######" } };
+            CollectionAssert.AreEqual(new[] { Paint.Orange, Paint.Green, Paint.Brown }, ColorRecipes.MixedWells(level));
+        }
+    }
 }

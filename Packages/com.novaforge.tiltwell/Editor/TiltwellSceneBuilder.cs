@@ -74,6 +74,7 @@ namespace NovaForge.Tiltwell.Editor
             UIMenu.CreateConfirmPopup();
             UIMenu.CreateLevelResultPopup();
             UIMenu.CreateDailyRewardPopup();
+            BuildColorGuide();
 
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -494,6 +495,28 @@ namespace NovaForge.Tiltwell.Editor
             message.fontSizeMin = 26;
             message.fontSizeMax = 38;
 
+            // Recipe bar: which primaries make the colors this level needs. Tapping opens the color guide.
+            var barCard = UIMenu.Card(t, "RecipeBar", new Vector2(980, 104), new Color(1, 1, 1, 0.94f), 52, out var barFace);
+            UIMenu.Place((RectTransform)barCard, new Vector2(0.5f, 1), new Vector2(0, -282), new Vector2(980, 104));
+            var barButton = barFace.gameObject.AddComponent<Button>();
+            barButton.targetGraphic = barFace.GetComponent<Image>();
+            var barRow = barFace.gameObject.AddComponent<HorizontalLayoutGroup>();
+            barRow.padding = new RectOffset(44, 104, 0, 0);
+            barRow.spacing = 34;
+            barRow.childAlignment = TextAnchor.MiddleCenter;
+            barRow.childControlWidth = true;
+            barRow.childControlHeight = false;
+            barRow.childForceExpandWidth = barRow.childForceExpandHeight = false;
+            var recipeTemplate = RecipeRowObject(barFace, "Recipe", 54);
+            var help = UIMenu.Img(barCard, "Help", T.circle, T.primaryBottom);
+            UIMenu.Place(help.rectTransform, new Vector2(1, 0.5f), new Vector2(-24, 0), new Vector2(60, 60));
+            help.rectTransform.pivot = new Vector2(1, 0.5f);
+            help.rectTransform.anchoredPosition = new Vector2(-24, 0);
+            var q = UIMenu.Text(help.transform, "Q", "?", 42, FontStyles.Bold, 60);
+            UIMenu.OnColor(q);
+            UIMenu.Stretch(q.gameObject, help.transform);
+            barCard.gameObject.SetActive(false);
+
             var undo = UIMenu.IconButton(t, "Undo", UIIcons.Undo, UIButtonStyle.Secondary, 140);
             UIMenu.Place((RectTransform)undo.transform, new Vector2(0.5f, 0), new Vector2(-110, 50), new Vector2(140, 140));
             ((RectTransform)undo.transform).pivot = new Vector2(0.5f, 0);
@@ -514,7 +537,75 @@ namespace NovaForge.Tiltwell.Editor
             so.FindProperty("restartButton").objectReferenceValue = restart;
             so.FindProperty("hintButton").objectReferenceValue = hint;
             so.FindProperty("hintArrow").objectReferenceValue = arrow.rectTransform;
+            so.FindProperty("recipeBar").objectReferenceValue = barButton;
+            so.FindProperty("recipeBarRoot").objectReferenceValue = barCard.gameObject;
+            so.FindProperty("recipeTemplate").objectReferenceValue = recipeTemplate;
             so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // ------------------------------------------------------------------ color guide
+
+        private static void BuildColorGuide()
+        {
+            var view = UIMenu.CreateView<ColorGuideView>("ColorGuidePopup", UIViewKind.Popup, TiltwellViewIds.ColorGuide);
+            var panel = UIMenu.CreatePanel(view.transform, new Vector2(900, 1180));
+            var panelRoot = (RectTransform)panel.parent;
+            var layout = UIMenu.VerticalPadded(panel, 56, 50, 56, 22);
+            UIMenu.Localized(UIMenu.Text(layout, "Title", "Mixing colors", 64, FontStyles.Bold, 90), TiltwellStrings.ColorGuideTitle);
+            var sub = UIMenu.Text(layout, "Subtitle", "", 38, FontStyles.Normal, 100);
+            sub.color = T.textMuted;
+            UIMenu.Localized(sub, TiltwellStrings.ColorGuideText);
+
+            int n = ColorRecipes.MixedColors.Length;
+            var rows = new RecipeRow[n];
+            var backs = new Image[n];
+            for (int i = 0; i < n; i++)
+            {
+                var back = UIMenu.Img(layout, "Row" + i, T.rounded, T.surface, 40);
+                var le = back.gameObject.AddComponent<LayoutElement>();
+                le.preferredHeight = 150;
+                rows[i] = RecipeRowObject(back.transform, "Recipe", 84);
+                var rt = (RectTransform)rows[i].transform;
+                rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+                rt.sizeDelta = new Vector2(600, 110);
+                rows[i].gameObject.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
+                backs[i] = back;
+            }
+            UIMenu.Spacer(layout, 8);
+            var ok = UIMenu.Button(layout, "Ok", TiltwellStrings.GotIt, out _, UIButtonStyle.Success, UIIcons.Check, 128);
+
+            var so = new SerializedObject(view);
+            var rp = so.FindProperty("rows");
+            var bp = so.FindProperty("rowBackgrounds");
+            rp.arraySize = bp.arraySize = n;
+            for (int i = 0; i < n; i++)
+            {
+                rp.GetArrayElementAtIndex(i).objectReferenceValue = rows[i];
+                bp.GetArrayElementAtIndex(i).objectReferenceValue = backs[i];
+            }
+            so.FindProperty("okButton").objectReferenceValue = ok;
+            so.FindProperty("panel").objectReferenceValue = panelRoot;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>Empty RecipeRow (children are built at runtime) with a size the parent layout can read.</summary>
+        private static RecipeRow RecipeRowObject(Transform parent, string name, float dropSize)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(RecipeRow));
+            go.transform.SetParent(parent, false);
+            ((RectTransform)go.transform).sizeDelta = new Vector2(300, dropSize * 1.4f);
+            var h = go.GetComponent<HorizontalLayoutGroup>();
+            h.spacing = dropSize * 0.18f;
+            h.childAlignment = TextAnchor.MiddleCenter;
+            h.childControlWidth = h.childControlHeight = false;
+            h.childForceExpandWidth = h.childForceExpandHeight = false;
+            var so = new SerializedObject(go.GetComponent<RecipeRow>());
+            so.FindProperty("circle").objectReferenceValue = T.circle;
+            so.FindProperty("font").objectReferenceValue = T.displayFont;
+            so.FindProperty("dropSize").floatValue = dropSize;
+            so.FindProperty("signColor").colorValue = T.text;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return go.GetComponent<RecipeRow>();
         }
 
         // ------------------------------------------------------------------ helpers

@@ -26,6 +26,14 @@ namespace NovaForge.Tiltwell.Unity
         public const int ExtraMoves = 5;
     }
 
+    /// <summary>One-time tutorials (stored by Core's TutorialService).</summary>
+    public static class TiltwellTutorials
+    {
+        public const string Mix = "color_mix";
+        public const string Brown = "color_brown";
+        public const string Step = "seen";
+    }
+
     /// <summary>The puzzle screen (view id "gameplay"). Args: level id.</summary>
     public sealed class GameplayView : UIView
     {
@@ -42,11 +50,21 @@ namespace NovaForge.Tiltwell.Unity
         [SerializeField] private Button restartButton;
         [SerializeField] private Button hintButton;
         [SerializeField] private RectTransform hintArrow;
+        [Header("Color teaching")]
+        [Tooltip("Pill under the HUD listing the recipes this level needs. Tapping it opens the color guide.")]
+        [SerializeField] private Button recipeBar;
+        [Tooltip("Object toggled with the bar (its card wrapper). Defaults to the button itself.")]
+        [SerializeField] private GameObject recipeBarRoot;
+        [SerializeField] private RecipeRow recipeTemplate;
+        [Tooltip("Recipe bar is shown up to this tier (and on the first brown tier).")]
+        [SerializeField] private int recipeBarMaxTier = 4;
 
         private PuzzleSession _session;
         private Tilt? _queued;
         private bool _finished;
         private IDisposable _balanceSub;
+        private bool _guided;
+        private readonly List<GameObject> _recipes = new List<GameObject>();
 
         public PuzzleSession Session => _session;
         public bool IsAnimating => board != null && board.IsAnimating;
@@ -59,6 +77,8 @@ namespace NovaForge.Tiltwell.Unity
             undoButton.onClick.AddListener(OnUndo);
             restartButton.onClick.AddListener(OnRestart);
             hintButton.onClick.AddListener(OnHint);
+            if (recipeBar != null) recipeBar.onClick.AddListener(() => Navigation.ShowPopupAsync(TiltwellViewIds.ColorGuide).Forget());
+            if (recipeTemplate != null) recipeTemplate.gameObject.SetActive(false);
         }
 
         protected override void OnShowing(object args)
@@ -81,6 +101,75 @@ namespace NovaForge.Tiltwell.Unity
                 : null);
             _balanceSub = Core.Events.Subscribe<BalanceChanged>(_ => RefreshHud());
             RefreshHud();
+
+            var mixes = ColorRecipes.MixedWells(level);
+            ShowRecipes(level, mixes);
+            // Free direction arrow on the very first level and on the first level that needs mixing.
+            _guided = index == 0 || (mixes.Count > 0 && !Core.Tutorials.IsCompleted(TiltwellTutorials.Mix));
+            if (_guided) ShowGuideArrow();
+            TeachOnce(mixes);
+        }
+
+        private void ShowRecipes(LevelData level, List<Paint> mixes)
+        {
+            foreach (var go in _recipes) Destroy(go);
+            _recipes.Clear();
+            if (recipeBar == null || recipeTemplate == null) return;
+            bool brownIntro = mixes.Contains(Paint.Brown) && !HasBrownBefore(level);
+            bool show = mixes.Count > 0 && (level.Tier <= recipeBarMaxTier || brownIntro || IsBrownTier(level));
+            (recipeBarRoot != null ? recipeBarRoot : recipeBar.gameObject).SetActive(show);
+            if (!show) return;
+            foreach (var color in mixes)
+            {
+                var row = Instantiate(recipeTemplate, recipeTemplate.transform.parent, false);
+                row.gameObject.SetActive(true);
+                row.Set(color);
+                _recipes.Add(row.gameObject);
+            }
+            // Shrink the pill to its content (one recipe is short, three are wide).
+            if (recipeBarRoot != null && recipeBarRoot.transform is RectTransform rootRt)
+            {
+                var face = (RectTransform)recipeBar.transform;
+                LayoutRebuilder.ForceRebuildLayoutImmediate(face);
+                float width = LayoutUtility.GetPreferredWidth(face);
+                rootRt.sizeDelta = new Vector2(Mathf.Clamp(width, 360f, 1000f), rootRt.sizeDelta.y);
+            }
+        }
+
+        /// <summary>Opens the color guide once: first mixing level, then again when brown appears.</summary>
+        private void TeachOnce(List<Paint> mixes)
+        {
+            string id = mixes.Contains(Paint.Brown) ? TiltwellTutorials.Brown : mixes.Count > 0 ? TiltwellTutorials.Mix : null;
+            if (id == null || Core.Tutorials.IsCompleted(id)) return;
+            if (!Core.Tutorials.TryStart(id)) return;
+            Core.Tutorials.Advance(TiltwellTutorials.Step);
+            if (id == TiltwellTutorials.Brown && !Core.Tutorials.IsCompleted(TiltwellTutorials.Mix) && Core.Tutorials.TryStart(TiltwellTutorials.Mix))
+                Core.Tutorials.Advance(TiltwellTutorials.Step);
+            Navigation.ShowPopupAsync(TiltwellViewIds.ColorGuide, id == TiltwellTutorials.Brown ? Paint.Brown : mixes[0]).Forget();
+        }
+
+        private void ShowGuideArrow()
+        {
+            if (_finished || _session.Status != PuzzleStatus.Playing) return;
+            var next = _session.Hint();
+            if (next.HasValue) ShowHintArrow(next.Value);
+        }
+
+        private static bool IsBrownTier(LevelData level)
+        {
+            var app = TiltwellApp.Instance;
+            var first = app.Levels.Find(HasBrownWell);
+            return first != null && first.Tier == level.Tier;
+        }
+
+        private static bool HasBrownBefore(LevelData level)
+        {
+            foreach (var l in TiltwellApp.Instance.Levels)
+            {
+                if (l == level) return false;
+                if (HasBrownWell(l)) return true;
+            }
+            return false;
         }
 
         protected override void OnHiding()
@@ -148,6 +237,7 @@ namespace NovaForge.Tiltwell.Unity
             foreach (var s in result.Steps)
                 if (s.Fate == DropletFate.Delivered && AudioService.Instance != null) AudioService.Instance.PlaySfx(SoundIds.RewardCollect);
             await AfterMove();
+            if (this != null && _guided && !_queued.HasValue) ShowGuideArrow();
             if (this != null && _queued.HasValue && !_finished)
             {
                 var next = _queued.Value;
@@ -213,6 +303,7 @@ namespace NovaForge.Tiltwell.Unity
             HideHintArrow();
             ShowMessage(null);
             RefreshHud();
+            if (_guided) ShowGuideArrow();
         }
 
         private void OnRestart()
@@ -224,6 +315,7 @@ namespace NovaForge.Tiltwell.Unity
             HideHintArrow();
             ShowMessage(null);
             RefreshHud();
+            if (_guided) ShowGuideArrow();
         }
 
         private async void OnHint()

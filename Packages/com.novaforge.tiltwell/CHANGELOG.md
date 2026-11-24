@@ -7,6 +7,11 @@
 - `tiltwell.world_n` string in 8 languages.
 - Tiers 6-10: 56 new levels (92 total). Brown wells (need red, yellow and blue) from tier 7, with a `tiltwell.tutorial_brown` hint on the first one. The first 36 levels are unchanged.
 - Level map colors for worlds 6-10.
+- Color teaching:
+  - `ColorGuideView` popup (`color_guide`), shown once on the first mixing level and again when brown first appears.
+  - Recipe bar on the gameplay screen up to tier 4 (and the brown world); tapping it opens the guide.
+  - Free direction arrow on level 1 and on the first mixing level.
+  - New types: `RecipeRow`, `ColorRecipes`.
 
 ### Changed
 - `BoardView`: themed board (panel, raised walls, deep holes, glowing wells, glossy droplets, squash while sliding, particles on merge/deliver). Sprites come from the theme.

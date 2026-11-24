@@ -5,6 +5,7 @@ using NovaForge.Core;
 using NovaForge.Core.Ads;
 using NovaForge.Core.Economy;
 using NovaForge.Core.Localization;
+using NovaForge.Core.Meta;
 using NovaForge.Core.Progression;
 using NovaForge.Core.Shop;
 using NovaForge.Core.UI;
@@ -72,6 +73,9 @@ namespace NovaForge.Tiltwell.Unity
             setup.LocalConfig = local;
 
             foreach (var table in TiltwellStrings.AsJsonTables()) setup.LocalizationTables.Add(table);
+
+            setup.Tutorials.Add(new TutorialDefinition(TiltwellTutorials.Mix, new[] { TiltwellTutorials.Step }));
+            setup.Tutorials.Add(new TutorialDefinition(TiltwellTutorials.Brown, new[] { TiltwellTutorials.Step }));
 
             setup.ShopItems.Add(ShopItem.ForSoftCurrency("hints_3", ShopCategories.Hints,
                 new[] { new ResourceAmount("coin", 150) }, RewardBundle.Of(TiltwellIds.Hint, 3), sortOrder: 0));
