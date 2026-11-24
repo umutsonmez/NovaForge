@@ -47,7 +47,7 @@ namespace NovaForge.Tiltwell.Unity
         protected override void OnShown()
         {
             DailyRewardView.EnqueueIfClaimable();
-            if (AudioService.Instance != null) AudioService.Instance.PlayMusic("menu");
+            if (AudioService.Instance != null) AudioService.Instance.PlayMusic(TiltwellSounds.Music);
         }
     }
 }

@@ -12,6 +12,7 @@
   - Recipe bar on the gameplay screen up to tier 4 (and the brown world); tapping it opens the guide.
   - Free direction arrow on level 1 and on the first mixing level.
   - New types: `RecipeRow`, `ColorRecipes`.
+- Sound: `TiltwellSoundBuilder` synthesizes 10 effects and a seamless music loop into `Runtime/Audio`, plus the `AudioLibrary`. Gameplay plays slide, bump, merge, deliver and fall sounds. `BoardView.Animate` takes a `landed` callback. Haptics fire on landing.
 
 ### Changed
 - `BoardView`: themed board (panel, raised walls, deep holes, glowing wells, glossy droplets, squash while sliding, particles on merge/deliver). Sprites come from the theme.

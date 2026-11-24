@@ -59,7 +59,16 @@ namespace NovaForge.Tiltwell.Editor
             appSo.FindProperty("supportEmail").stringValue = SupportEmail;
             appSo.FindProperty("adMobSettings").objectReferenceValue = AssetDatabase.LoadAssetAtPath<ScriptableObject>(AdMobSettingsPath);
             appSo.ApplyModifiedPropertiesWithoutUndo();
-            appGo.AddComponent<AudioService>();
+            var audio = appGo.AddComponent<AudioService>();
+            var library = TiltwellSoundBuilder.LoadLibrary();
+            if (library == null)
+            {
+                TiltwellSoundBuilder.Build();
+                library = TiltwellSoundBuilder.LoadLibrary();
+            }
+            var audioSo = new SerializedObject(audio);
+            audioSo.FindProperty("library").objectReferenceValue = library;
+            audioSo.ApplyModifiedPropertiesWithoutUndo();
             appGo.SetActive(true);
 
             var root = UIMenu.CreateUIRoot();

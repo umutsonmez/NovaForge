@@ -240,7 +240,8 @@ namespace NovaForge.Tiltwell.Unity
 
         private static RectTransform Root(Image body) => (RectTransform)body.transform.parent;
 
-        public async Task Animate(TiltResult result)
+        /// <param name="landed">Called once when every droplet has stopped sliding (before merges and wells resolve).</param>
+        public async Task Animate(TiltResult result, System.Action<TiltResult> landed = null)
         {
             IsAnimating = true;
             try
@@ -276,6 +277,7 @@ namespace NovaForge.Tiltwell.Unity
                     }
                 }
                 foreach (var m in movers) if (m.rt != null) m.rt.localScale = Vector3.one;
+                landed?.Invoke(result);
 
                 // Phase 2: merges recolor, holes swallow, wells fill.
                 var shrinking = new List<RectTransform>();

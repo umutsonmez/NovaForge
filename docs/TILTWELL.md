@@ -41,6 +41,12 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 ```
 `LevelPackTests` gönderilen her bölümü solver ile yeniden çözer; par tutmazsa test kırılır.
 
+## Ses ve titreşim
+- Tüm sesler kodla sentezlenir (`Editor/TiltwellSoundBuilder`, menü NOVAFORGE ▸ Tiltwell ▸ Regenerate Sounds). Çıktı `Runtime/Audio/*.wav` ve `TiltwellAudio.asset`; üçüncü parti ses yok, lisans derdi yok.
+- Efektler: tıklama, popup, kayma, duvara çarpma, birleşme, kuyuya girme, deliğe düşme, coin, kazanma, kaybetme. Müzik: 20 sn'lik dikişsiz döngü (C–Am–F–G, 96 bpm).
+- Titreşim: damlalar durunca hafif; kuyu veya delik olunca orta. Ayarlardaki Titreşim anahtarına bağlı.
+- Sesler hoparlörde dinlenmedi; dalga formu (tepe, tıklama, döngü dikişi) script ile kontrol edildi.
+
 ## Reklam
 `AdMobSettings` atanırsa AdMob (UMP consent köprüsü `OnCoreBuilt` içinde bağlanır); atanmazsa development build'de `MockAdsProvider`, release'de reklam yok.
 Release build için `privacyPolicyUrl` (https) zorunlu; yoksa Core doğrulaması başlatmayı durdurur.
@@ -50,6 +56,5 @@ Release build için `privacyPolicyUrl` (https) zorunlu; yoksa Core doğrulaması
 - Unity PlayMode `TiltwellPlayTests`: gerçek sahne; günlük ödül popup'ı → Play → bölüm 1'i solver hamleleriyle çöz → 3 yıldız + coin → Next ile bölüm 2. Ayrıca geri al ve ipucu harcama.
 
 ## Eksikler (dürüst liste)
-- Ses dosyası yok: `AudioLibrary` atanmamış, oyun sessiz çalışır.
 - Uygulama ikonu, splash ve mağaza görselleri yok.
 - Japonca/Korece karakterler Nunito'da yok (Noto fallback gerekli).
