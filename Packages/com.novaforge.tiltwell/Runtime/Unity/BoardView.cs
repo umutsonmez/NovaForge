@@ -1,35 +1,42 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using NovaForge.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace NovaForge.Tiltwell.Unity
 {
-    /// <summary>Paint colors and generated sprites (no art assets needed; a game can swap them later).</summary>
+    /// <summary>Paint colors, board palette and fallback sprites (no art assets needed; the scene assigns theme sprites).</summary>
     public static class TiltwellVisuals
     {
         public static Color Of(Paint p) => p switch
         {
-            Paint.Red => new Color32(0xE8, 0x48, 0x55, 0xFF),
-            Paint.Yellow => new Color32(0xF6, 0xC9, 0x3B, 0xFF),
-            Paint.Blue => new Color32(0x3B, 0x82, 0xF0, 0xFF),
-            Paint.Orange => new Color32(0xF2, 0x8C, 0x28, 0xFF),
-            Paint.Purple => new Color32(0x9B, 0x59, 0xD0, 0xFF),
-            Paint.Green => new Color32(0x3F, 0xB9, 0x6B, 0xFF),
-            Paint.Brown => new Color32(0x8A, 0x5A, 0x3C, 0xFF),
+            Paint.Red => new Color32(0xFF, 0x4F, 0x64, 0xFF),
+            Paint.Yellow => new Color32(0xFF, 0xC8, 0x2E, 0xFF),
+            Paint.Blue => new Color32(0x3D, 0x8B, 0xFF, 0xFF),
+            Paint.Orange => new Color32(0xFF, 0x8A, 0x1F, 0xFF),
+            Paint.Purple => new Color32(0xA2, 0x5C, 0xF0, 0xFF),
+            Paint.Green => new Color32(0x2E, 0xC4, 0x6E, 0xFF),
+            Paint.Brown => new Color32(0x9A, 0x63, 0x42, 0xFF),
             _ => Color.white,
         };
 
-        public static readonly Color Background = new Color32(0x1B, 0x1E, 0x2B, 0xFF);
-        public static readonly Color Floor = new Color32(0x2C, 0x31, 0x45, 0xFF);
-        public static readonly Color Wall = new Color32(0x12, 0x14, 0x1D, 0xFF);
-        public static readonly Color Hole = new Color32(0x05, 0x06, 0x0A, 0xFF);
+        public static readonly Color BackgroundTop = new Color32(0xA9, 0xD6, 0xFF, 0xFF);
+        public static readonly Color BackgroundBottom = new Color32(0xE8, 0xDC, 0xFF, 0xFF);
+        public static readonly Color Background = BackgroundBottom;
+        public static readonly Color Panel = Color.white;
+        public static readonly Color Floor = new Color32(0xEE, 0xF2, 0xFA, 0xFF);
+        public static readonly Color FloorAlt = new Color32(0xE4, 0xE9, 0xF5, 0xFF);
+        public static readonly Color WallTop = new Color32(0x97, 0xA3, 0xC9, 0xFF);
+        public static readonly Color WallBottom = new Color32(0x76, 0x82, 0xAB, 0xFF);
+        public static readonly Color WallEdge = new Color32(0x58, 0x63, 0x8C, 0xFF);
+        public static readonly Color Hole = new Color32(0x26, 0x2B, 0x47, 0xFF);
 
         private static Sprite _circle, _ring, _rounded;
         public static Sprite Circle => _circle != null ? _circle : _circle = Make(128, (d, r) => d <= r - 1 ? 1f : Mathf.Clamp01(r - d));
         public static Sprite Ring => _ring != null ? _ring : _ring = Make(128, (d, r) =>
         {
-            float outer = Mathf.Clamp01(r - d), inner = Mathf.Clamp01(d - r * 0.72f);
+            float outer = Mathf.Clamp01(r - d), inner = Mathf.Clamp01(d - r * 0.76f);
             return Mathf.Min(outer, inner);
         });
         public static Sprite Rounded => _rounded != null ? _rounded : _rounded = MakeRounded(64, 14);
@@ -76,70 +83,162 @@ namespace NovaForge.Tiltwell.Unity
     public sealed class BoardView : MonoBehaviour
     {
         [SerializeField, Min(1f)] private float cellsPerSecond = 16f;
-        [SerializeField, Min(0f)] private float settleDuration = 0.18f;
+        [SerializeField, Min(0f)] private float settleDuration = 0.2f;
+
+        [Header("Sprites (fallbacks are generated)")]
+        [SerializeField] private Sprite rounded;
+        [Tooltip("Corner radius of the rounded sprite in pixels (DefaultTheme: 48).")]
+        [SerializeField] private float roundedRadiusPx = 48f;
+        [SerializeField] private Sprite circle;
+        [SerializeField] private Sprite softShadow;
 
         private readonly Dictionary<int, Image> _drops = new Dictionary<int, Image>();
-        private readonly List<Image> _wells = new List<Image>();
         private readonly List<Image> _wellFills = new List<Image>();
-        private RectTransform _rect, _layer;
+        private readonly List<Image> _wellGlows = new List<Image>();
+        private RectTransform _rect, _layer, _fx;
         private Board _board;
         private float _cell;
 
+        private struct Particle
+        {
+            public RectTransform Rt;
+            public Image Img;
+            public Vector2 Velocity;
+            public float Age, Life, Size;
+        }
+
+        private readonly List<Particle> _particles = new List<Particle>();
+        private readonly Stack<Image> _particlePool = new Stack<Image>();
+
         public bool IsAnimating { get; private set; }
         public float CellSize => _cell;
+
+        private Sprite RoundedSprite => rounded != null ? rounded : TiltwellVisuals.Rounded;
+        private float RoundedPx => rounded != null ? roundedRadiusPx : 14f;
+        private Sprite CircleSprite => circle != null ? circle : TiltwellVisuals.Circle;
 
         private void Awake() => _rect = (RectTransform)transform;
 
         public void Build(Board board, PuzzleState state)
         {
             _board = board;
-            if (_layer != null) Destroy(_layer.gameObject);
+            if (_layer != null) Destroy(_layer.parent == _rect ? _layer.gameObject : _layer.parent.gameObject);
             _drops.Clear();
-            _wells.Clear();
             _wellFills.Clear();
+            _wellGlows.Clear();
+            ClearParticles();
 
-            _layer = NewRect("Board", _rect);
             var size = _rect.rect.size;
-            _cell = Mathf.Floor(Mathf.Min(size.x / board.Width, size.y / board.Height));
-            _layer.sizeDelta = new Vector2(_cell * board.Width, _cell * board.Height);
+            const float frame = 0.45f; // panel margin around the grid, in cells
+            _cell = Mathf.Floor(Mathf.Min(size.x / (board.Width + frame * 2), size.y / (board.Height + frame * 2)));
+            var grid = new Vector2(_cell * board.Width, _cell * board.Height);
+
+            var root = NewRect("BoardRoot", _rect);
+            root.sizeDelta = grid;
+
+            // White panel with soft shadow.
+            float pad = _cell * frame;
+            if (softShadow != null)
+            {
+                var sh = NewImage("Shadow", root, softShadow, new Color(0.1f, 0.12f, 0.35f, 0.3f));
+                sh.type = Image.Type.Sliced;
+                sh.rectTransform.sizeDelta = grid + Vector2.one * (pad * 2 + 70);
+                sh.rectTransform.anchoredPosition = new Vector2(0, -22);
+            }
+            var panel = NewImage("Panel", root, RoundedSprite, TiltwellVisuals.Panel);
+            Slice(panel, _cell * 0.55f);
+            panel.rectTransform.sizeDelta = grid + Vector2.one * pad * 2;
+            panel.gameObject.AddComponent<UIGradient>().Set(Color.white, new Color(0.94f, 0.95f, 0.99f));
+
+            _layer = NewRect("Board", root);
+            _layer.sizeDelta = grid;
 
             for (int y = 0; y < board.Height; y++)
                 for (int x = 0; x < board.Width; x++)
                 {
+                    int pos = board.Pos(x, y);
                     var cell = board.At(x, y);
-                    var tile = NewImage("Cell", _layer, TiltwellVisuals.Rounded, cell == Cell.Wall ? TiltwellVisuals.Wall : TiltwellVisuals.Floor);
-                    tile.type = Image.Type.Sliced;
-                    Place(tile.rectTransform, board.Pos(x, y), 0.94f);
+                    if (cell == Cell.Wall)
+                    {
+                        var edge = NewImage("WallEdge", _layer, RoundedSprite, TiltwellVisuals.WallEdge);
+                        Slice(edge, _cell * 0.2f);
+                        Place(edge.rectTransform, pos, 0.94f);
+                        var face = NewImage("Wall", _layer, RoundedSprite, Color.white);
+                        Slice(face, _cell * 0.2f);
+                        Place(face.rectTransform, pos, 0.94f);
+                        face.rectTransform.sizeDelta -= new Vector2(0, _cell * 0.09f);
+                        face.rectTransform.anchoredPosition += new Vector2(0, _cell * 0.045f);
+                        face.gameObject.AddComponent<UIGradient>().Set(TiltwellVisuals.WallTop, TiltwellVisuals.WallBottom);
+                        continue;
+                    }
+                    var tile = NewImage("Cell", _layer, RoundedSprite, (x + y) % 2 == 0 ? TiltwellVisuals.Floor : TiltwellVisuals.FloorAlt);
+                    Slice(tile, _cell * 0.2f);
+                    Place(tile.rectTransform, pos, 0.94f);
                     if (cell == Cell.Hole)
-                        Place(NewImage("Hole", _layer, TiltwellVisuals.Circle, TiltwellVisuals.Hole).rectTransform, board.Pos(x, y), 0.7f);
+                    {
+                        var hole = NewImage("Hole", _layer, CircleSprite, TiltwellVisuals.Hole);
+                        Place(hole.rectTransform, pos, 0.68f);
+                        hole.gameObject.AddComponent<UIGradient>().Set(new Color(0.55f, 0.55f, 0.6f), Color.white);
+                        var rim = NewImage("Rim", hole.transform, TiltwellVisuals.Ring, new Color(1f, 1f, 1f, 0.35f));
+                        Stretch(rim.rectTransform);
+                    }
                 }
 
             for (int w = 0; w < board.Wells.Count; w++)
             {
                 var color = TiltwellVisuals.Of(board.WellColors[w]);
-                var fill = NewImage("WellFill", _layer, TiltwellVisuals.Circle, color);
-                Place(fill.rectTransform, board.Wells[w], 0.5f);
+                int pos = board.Wells[w];
+                if (softShadow != null)
+                {
+                    var glow = NewImage("WellGlow", _layer, softShadow, Fade(color, 0f));
+                    Place(glow.rectTransform, pos, 1.3f);
+                    _wellGlows.Add(glow);
+                }
+                else _wellGlows.Add(null);
+                var basin = NewImage("WellBasin", _layer, CircleSprite, Fade(color, 0.16f));
+                Place(basin.rectTransform, pos, 0.84f);
+                var fill = NewImage("WellFill", _layer, CircleSprite, color);
+                Place(fill.rectTransform, pos, 0.5f);
+                fill.gameObject.AddComponent<UIGradient>().Set(Color.white, new Color(0.85f, 0.85f, 0.9f));
                 var ring = NewImage("Well", _layer, TiltwellVisuals.Ring, color);
-                Place(ring.rectTransform, board.Wells[w], 0.86f);
+                Place(ring.rectTransform, pos, 0.86f);
                 _wellFills.Add(fill);
-                _wells.Add(ring);
             }
+
+            _fx = NewRect("Effects", root);
+            _fx.sizeDelta = grid;
             Sync(state);
         }
 
         /// <summary>Snaps the view to a state (after undo/restart).</summary>
         public void Sync(PuzzleState state)
         {
-            foreach (var d in _drops.Values) if (d != null) Destroy(d.gameObject);
+            foreach (var d in _drops.Values) if (d != null) Destroy(Root(d).gameObject);
             _drops.Clear();
-            for (int w = 0; w < _wells.Count; w++) SetWellFilled(w, !state.IsWellOpen(w), instant: true);
-            foreach (var d in state.Droplets)
-            {
-                var img = NewImage("Drop" + d.Id, _layer, TiltwellVisuals.Circle, TiltwellVisuals.Of(d.Color));
-                Place(img.rectTransform, d.Pos, 0.72f);
-                _drops[d.Id] = img;
-            }
+            for (int w = 0; w < _wellFills.Count; w++) SetWellFilled(w, !state.IsWellOpen(w), instant: true);
+            foreach (var d in state.Droplets) _drops[d.Id] = CreateDrop(d.Id, d.Pos, TiltwellVisuals.Of(d.Color));
+            if (_fx != null) _fx.SetAsLastSibling();
         }
+
+        /// <summary>Drop = root (moves) with shadow, body (colored, returned) and shine.</summary>
+        private Image CreateDrop(int id, int pos, Color color)
+        {
+            var root = NewRect("Drop" + id, _layer);
+            Place(root, pos, 0.74f);
+            var shadow = NewImage("Shadow", root, CircleSprite, new Color(0.1f, 0.12f, 0.3f, 0.22f));
+            Stretch(shadow.rectTransform);
+            shadow.rectTransform.anchoredPosition = new Vector2(0, -_cell * 0.06f);
+            var body = NewImage("Body", root, CircleSprite, color);
+            Stretch(body.rectTransform);
+            body.gameObject.AddComponent<UIGradient>().Set(new Color(1.0f, 1.0f, 1.0f), new Color(0.78f, 0.78f, 0.84f));
+            var shine = NewImage("Shine", root, CircleSprite, new Color(1f, 1f, 1f, 0.7f));
+            shine.rectTransform.sizeDelta = new Vector2(_cell * 0.2f, _cell * 0.15f);
+            shine.rectTransform.anchoredPosition = new Vector2(-_cell * 0.12f, _cell * 0.15f);
+            shine.rectTransform.localRotation = Quaternion.Euler(0, 0, 35f);
+            return body;
+        }
+
+        private static RectTransform Root(Image body) => (RectTransform)body.transform.parent;
 
         public async Task Animate(TiltResult result)
         {
@@ -155,7 +254,7 @@ namespace NovaForge.Tiltwell.Unity
                     float dist = Mathf.Abs(_board.X(s.To) - _board.X(s.From)) + Mathf.Abs(_board.Y(s.To) - _board.Y(s.From));
                     if (dist <= 0f) continue;
                     float duration = Mathf.Max(0.05f, dist / cellsPerSecond);
-                    movers.Add((img.rectTransform, CellCenter(s.From), CellCenter(s.To), duration));
+                    movers.Add((Root(img), CellCenter(s.From), CellCenter(s.To), duration));
                     total = Mathf.Max(total, duration);
                 }
                 for (float t = 0f; t < total;)
@@ -168,8 +267,15 @@ namespace NovaForge.Tiltwell.Unity
                         if (m.rt == null) continue;
                         float k = Mathf.Clamp01(t / m.duration);
                         m.rt.anchoredPosition = Vector2.LerpUnclamped(m.from, m.to, EaseOutBack(k));
+                        // squash along the travel direction while moving
+                        var dir = m.to - m.from;
+                        float squash = k < 1f ? 0.1f : 0f;
+                        m.rt.localScale = Mathf.Abs(dir.x) > Mathf.Abs(dir.y)
+                            ? new Vector3(1f + squash, 1f - squash, 1f)
+                            : new Vector3(1f - squash, 1f + squash, 1f);
                     }
                 }
+                foreach (var m in movers) if (m.rt != null) m.rt.localScale = Vector3.one;
 
                 // Phase 2: merges recolor, holes swallow, wells fill.
                 var shrinking = new List<RectTransform>();
@@ -180,19 +286,25 @@ namespace NovaForge.Tiltwell.Unity
                     switch (s.Fate)
                     {
                         case DropletFate.Merged:
-                            Destroy(img.gameObject);
+                            Destroy(Root(img).gameObject);
                             _drops.Remove(s.Id);
                             if (_drops.TryGetValue(s.Other, out var host))
                             {
                                 host.color = TiltwellVisuals.Of(s.Color);
-                                pulsing.Add(host.rectTransform);
+                                pulsing.Add(Root(host));
+                                Burst(Root(host).anchoredPosition, host.color, 12);
                             }
                             break;
                         case DropletFate.FellInHole:
                         case DropletFate.Delivered:
-                            shrinking.Add(img.rectTransform);
+                            shrinking.Add(Root(img));
                             _drops.Remove(s.Id);
-                            if (s.Fate == DropletFate.Delivered) SetWellFilled(s.Other, true, instant: false);
+                            if (s.Fate == DropletFate.Delivered)
+                            {
+                                SetWellFilled(s.Other, true, instant: false);
+                                Burst(CellCenter(s.To), img.color, 18);
+                            }
+                            else Burst(CellCenter(s.To), new Color(0.3f, 0.33f, 0.5f), 6);
                             break;
                     }
                 }
@@ -203,7 +315,7 @@ namespace NovaForge.Tiltwell.Unity
                     t += Time.unscaledDeltaTime;
                     float k = Mathf.Clamp01(t / settleDuration);
                     foreach (var rt in shrinking) if (rt != null) rt.localScale = Vector3.one * (1f - k);
-                    foreach (var rt in pulsing) if (rt != null) rt.localScale = Vector3.one * (1f + 0.25f * Mathf.Sin(k * Mathf.PI));
+                    foreach (var rt in pulsing) if (rt != null) rt.localScale = Vector3.one * (1f + 0.28f * Mathf.Sin(k * Mathf.PI));
                     for (int w = 0; w < _wellFills.Count; w++) UpdateWellPulse(w, k);
                 }
                 foreach (var rt in shrinking) if (rt != null) Destroy(rt.gameObject);
@@ -226,9 +338,11 @@ namespace NovaForge.Tiltwell.Unity
         {
             if (w < 0 || w >= _wellFills.Count) return;
             var c = _wellFills[w].color;
-            c.a = filled ? 1f : 0.22f;
+            c.a = filled ? 1f : 0.3f;
             _wellFills[w].color = c;
             _wellFills[w].rectTransform.localScale = Vector3.one * (filled ? 1.5f : 1f);
+            var glow = _wellGlows[w];
+            if (glow != null) glow.color = Fade(glow.color, filled ? 0.35f : 0f);
             if (filled && !instant) _pulseWells.Add(w);
         }
 
@@ -239,11 +353,79 @@ namespace NovaForge.Tiltwell.Unity
             if (k >= 1f) _pulseWells.Remove(w);
         }
 
+        // ------------------------------------------------------------------ particles
+
+        private void Burst(Vector2 at, Color color, int count)
+        {
+            if (_fx == null) return;
+            for (int i = 0; i < count; i++)
+            {
+                var img = _particlePool.Count > 0 ? _particlePool.Pop() : NewImage("Spark", _fx, CircleSprite, Color.white);
+                img.gameObject.SetActive(true);
+                img.color = i % 3 == 0 ? Color.white : color;
+                float size = _cell * Random.Range(0.08f, 0.17f);
+                img.rectTransform.sizeDelta = Vector2.one * size;
+                img.rectTransform.anchoredPosition = at;
+                float a = (i / (float)count + Random.Range(-0.05f, 0.05f)) * Mathf.PI * 2f;
+                _particles.Add(new Particle
+                {
+                    Rt = img.rectTransform, Img = img, Size = size,
+                    Velocity = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * _cell * Random.Range(2.2f, 4.2f),
+                    Life = Random.Range(0.35f, 0.55f),
+                });
+            }
+        }
+
+        private void Update()
+        {
+            if (_particles.Count == 0) return;
+            float dt = Time.unscaledDeltaTime;
+            for (int i = _particles.Count - 1; i >= 0; i--)
+            {
+                var p = _particles[i];
+                p.Age += dt;
+                if (p.Age >= p.Life || p.Rt == null)
+                {
+                    if (p.Img != null) { p.Img.gameObject.SetActive(false); _particlePool.Push(p.Img); }
+                    _particles.RemoveAt(i);
+                    continue;
+                }
+                p.Velocity *= 1f - 4f * dt;
+                p.Rt.anchoredPosition += p.Velocity * dt;
+                float k = 1f - p.Age / p.Life;
+                p.Rt.sizeDelta = Vector2.one * p.Size * k;
+                _particles[i] = p;
+            }
+        }
+
+        private void ClearParticles()
+        {
+            _particles.Clear();
+            _particlePool.Clear(); // pooled images die with the old board root
+        }
+
+        // ------------------------------------------------------------------ helpers
+
         private void Place(RectTransform rt, int pos, float scale)
         {
             rt.sizeDelta = Vector2.one * _cell * scale;
             rt.anchoredPosition = CellCenter(pos);
         }
+
+        private void Slice(Image img, float radius)
+        {
+            img.type = Image.Type.Sliced;
+            img.pixelsPerUnitMultiplier = RoundedPx / Mathf.Max(1f, radius);
+        }
+
+        private static void Stretch(RectTransform rt)
+        {
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+        }
+
+        private static Color Fade(Color c, float a) => new Color(c.r, c.g, c.b, a);
 
         private static float EaseOutBack(float x)
         {

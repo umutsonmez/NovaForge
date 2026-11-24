@@ -34,6 +34,8 @@ namespace NovaForge.Tiltwell.Unity
         [SerializeField] private TMP_Text levelLabel;
         [SerializeField] private TMP_Text movesLabel;
         [SerializeField] private TMP_Text messageLabel;
+        [Tooltip("Optional background shown/hidden together with the message.")]
+        [SerializeField] private GameObject messageBubble;
         [SerializeField] private TMP_Text hintCountLabel;
         [SerializeField] private Button homeButton;
         [SerializeField] private Button undoButton;
@@ -252,7 +254,7 @@ namespace NovaForge.Tiltwell.Unity
         private void ShowMessage(string key)
         {
             if (messageLabel == null) return;
-            messageLabel.gameObject.SetActive(key != null);
+            (messageBubble != null ? messageBubble : messageLabel.gameObject).SetActive(key != null);
             if (key != null) messageLabel.text = Core.Localization.Get(key);
         }
 

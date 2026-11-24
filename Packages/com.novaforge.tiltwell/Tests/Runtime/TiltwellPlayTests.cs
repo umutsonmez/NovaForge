@@ -84,7 +84,7 @@ namespace NovaForge.Tiltwell.PlayTests
             Assert.AreEqual(3, core.Progression.Get("l001").BestStars);
             Assert.Greater(core.Economy.GetBalance("coin"), coinsBefore, "level reward granted");
 
-            Find<Button>("LevelResultPopup/Panel/Next").onClick.Invoke();
+            Find<Button>("LevelResultPopup/Panel/Face/Next").onClick.Invoke();
             yield return WaitUntil(() => nav.CurrentScreen == ViewIds.Gameplay && nav.TopPopup == null && !nav.IsBusy
                                          && Object.FindAnyObjectByType<GameplayView>().Session.Level.Id == "l002", "level 2");
         }

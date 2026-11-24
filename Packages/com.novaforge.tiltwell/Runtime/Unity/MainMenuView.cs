@@ -26,6 +26,7 @@ namespace NovaForge.Tiltwell.Unity
         [SerializeField] private Button levelsButton;
         [SerializeField] private Button shopButton;
         [SerializeField] private Button settingsButton;
+        [SerializeField] private Button dailyButton;
 
         protected override void Awake()
         {
@@ -34,6 +35,7 @@ namespace NovaForge.Tiltwell.Unity
             levelsButton.onClick.AddListener(() => Navigation.PushScreenAsync(TiltwellViewIds.Levels).Forget());
             shopButton.onClick.AddListener(() => Navigation.PushScreenAsync(ViewIds.Shop, "main_menu").Forget());
             settingsButton.onClick.AddListener(() => Navigation.ShowPopupAsync(ViewIds.Settings).Forget());
+            if (dailyButton != null) dailyButton.onClick.AddListener(() => Navigation.ShowPopupAsync(ViewIds.DailyReward).Forget());
         }
 
         protected override void OnShowing(object args)

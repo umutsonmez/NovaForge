@@ -45,6 +45,10 @@ namespace NovaForge.UI
         [SerializeField] private Button retryButton;
         [SerializeField] private Button homeButton;
         [SerializeField] private Button doubleRewardButton;
+        [Tooltip("Optional: burst on win.")]
+        [SerializeField] private ConfettiBurst confetti;
+        [Tooltip("Seconds between earned stars popping in (stars with a UIPopIn).")]
+        [SerializeField, Min(0f)] private float starStagger = 0.22f;
 
         private LevelSessionEnded _result;
         private bool _hasResult;
@@ -88,7 +92,12 @@ namespace NovaForge.UI
 
             if (title != null) title.text = loc.Get(won ? CoreStrings.WinTitle : CoreStrings.LoseTitle);
             int starCount = won && _result.Completion != null ? _result.Completion.Stars : 0;
-            for (int i = 0; i < stars.Length; i++) SetStar(i, won, i < starCount);
+            for (int i = 0; i < stars.Length; i++)
+            {
+                SetStar(i, won, i < starCount);
+                if (stars[i] != null && i < starCount && stars[i].TryGetComponent<UIPopIn>(out var pop)) pop.Play(0.25f + i * starStagger);
+            }
+            if (won && confetti != null) confetti.Burst();
             RenderReward();
             if (nextButton != null) nextButton.gameObject.SetActive(won);
             if (retryButton != null) retryButton.gameObject.SetActive(!won);

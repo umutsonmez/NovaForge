@@ -50,6 +50,38 @@ Geçişler `Time.unscaledDeltaTime` ile çalışır, yani oyun duraklatılmışk
 3. **Create Confirm Popup** / **Create Settings Popup**: çalışan, bağlantıları kurulmuş varsayılan görünümler. Stil verip prefab yap.
 4. Prefab'ları `UIManager.viewPrefabs` listesine ekle; ilk kullanımda oluşturulurlar. Sahnede duran view'lar da otomatik bulunur.
 
+## Tema (`UITheme`)
+
+Builder'ların bütün görselleri bir `UITheme` asset'inden gelir. Varsayılan: `Runtime/UI/Theme/DefaultTheme.asset`.
+
+| İçerik | Not |
+|---|---|
+| Fontlar | Nunito Bold (gövde), Nunito Black (başlık, gölgeli materyal), Material Icons Round (ikon fontu). Hepsi OFL/Apache 2.0, Türkçe karakterler tam. TMP dinamik SDF asset'leri. |
+| Sprite'lar | Yuvarlak köşe (9-slice, yarıçap 48px), daire, yumuşak gölge, parlaklık, yıldız. SDF matematiğiyle üretilir (4×4 supersample). |
+| Renkler | Arka plan/panel/yüzey gradyanları, metin, 5 buton stili (Primary, Secondary, Accent, Success, Danger: üst/alt/kenar), altın, rozet. |
+
+- Oyun kendi temasını kullanmak için build öncesi `UIMenu.Theme = benimTemam;` yapar (Tiltwell: varsayılanın kopyası, gökyüzü→lila arka plan).
+- Sprite/font asset'lerini yeniden üretmek: **NOVAFORGE ▸ UI ▸ Regenerate Default Theme Assets**.
+- İkonlar: `UIIcons` sabitleri (Material Icons kod noktaları). Örnek: `UIMenu.Icon(parent, "Home", UIIcons.Home, 64, color)`.
+
+Builder yapı taşları (`UIMenu`, hepsi public): `Button` (kabarık, gradyanlı, parlak, ikonlu; basınca yüzey kenara iner), `IconButton` (yuvarlak),
+`Chip` (ikonlu hap: para, bölüm), `Badge`, `Card` (gölgeli kart), `CreatePanel`, `Row` (ayar satırı), `Slider`, `Switch` (iOS tarzı),
+`Dropdown`, `IconBubble`, `CornerClose`, `Background`.
+
+Efekt bileşenleri (`NovaForge.UI`, hepsi unscaled time):
+
+| Bileşen | İş |
+|---|---|
+| `UIGradient` | Dikey iki renk gradyan (vertex rengi çarpar) |
+| `UIPulse` | Nefes alan ölçek (Play butonu, aktif bölüm halkası) |
+| `UIFloat` | Yavaş yukarı-aşağı süzülme (dekor, harita işaretçisi) |
+| `UIPopIn` | Açılışta yaylanarak büyüme (`Play(delay)` ile tekrar) |
+| `UIPolyline` | Kalın, yumuşak (Catmull-Rom), kesik çizgi seçenekli, kenarı yumuşatılmış yol |
+| `UIToggleSwitch` | Toggle'ı kayan anahtar yapar |
+| `ConfettiBurst` | Havuzlu uGUI konfeti (kazanınca sonuç ekranında) |
+
+`UIButtonFeedback` artık yaylı: `face` atanırsa yüzey aşağı iner, yoksa buton küçülür.
+
 ## Hazır oyun ekranları
 
 | View | Id | Ne yapar |
@@ -80,5 +112,6 @@ Geçişler `Time.unscaledDeltaTime` ile çalışır, yani oyun duraklatılmışk
 
 ## Bilinen sınırlar
 
-- Tema/stil sistemi yok: builder'lar uGUI varsayılan sprite'larını kullanır, oyun kendi stilini verir.
+- Panel yükseklikleri sabit; içerik çok uzarsa (çok dilli uzun metin) panel elle büyütülmeli.
+- Japonca/Korece glifler Nunito'da yok; fallback font eklenmeli.
 - Builder'lar mute toggle'ı üretmez; `SettingsView` alanları opsiyonel olduğu için gerekirse elle bağlanır.

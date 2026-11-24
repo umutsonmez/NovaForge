@@ -2,7 +2,15 @@
 All notable changes to `com.novaforge.core` are documented here. Format: [Keep a Changelog](https://keepachangelog.com), versioning: SemVer (see docs/VERSIONING.md).
 
 ## [Unreleased]
+### Added
+- **Theme system:** `UITheme` ScriptableObject + `DefaultTheme.asset` (Nunito Bold/Black, Material Icons Round, generated rounded/circle/shadow/gloss/star sprites, button style palette). `ThemeAssets` generator (NOVAFORGE ▸ UI ▸ Regenerate Default Theme Assets). `UIIcons` codepoints.
+- Effect components: `UIGradient`, `UIPulse`, `UIFloat`, `UIPopIn`, `UIPolyline` (smooth, dashed, mitred, feathered), `UIToggleSwitch`, `ConfettiBurst`.
+- `UIMenu` builders restyled from the theme: raised gradient buttons with gloss and icons, `IconButton`, `Chip`, `Badge`, `Card`, switch, slider, dropdown, corner close; `UIMenu.Theme` lets a game swap themes.
+
 ### Changed
+- `UIButtonFeedback`: spring press animation; optional `face` sinks onto the button edge.
+- `LevelResultView`: optional `ConfettiBurst` on win; earned stars pop in one after another (`UIPopIn`).
+- **Fix:** `ShopView` showed an empty buy button for soft-currency items (`GetDisplayPrice` is IAP-only); now shows e.g. "150 Coins", and "…" while the store price is unknown.
 - **Fix (AdMob, found on device):** SDK callbacks are marshalled through the main-thread `SynchronizationContext` captured at construction. `MobileAdsEventExecutor` is pumped by an object the plugin creates in `MobileAds.Initialize`, so UMP callbacks arriving before that never ran and ads never initialized.
 - `AdMobAdsProvider.Log` is settable (set it to `core.Log` in `OnCoreBuilt`); UMP start/result is logged.
 - `LevelResultView` dims unearned stars instead of hiding them.

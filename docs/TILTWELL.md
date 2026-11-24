@@ -15,10 +15,18 @@ Amaç: platformun her modülünü (ekonomi, ilerleme, günlük ödül, mağaza, 
 | Katman | Asmdef | Not |
 |---|---|---|
 | Kurallar, solver, üretici, `PuzzleSession` | `NovaForge.Tiltwell.Logic` | Motor bağımsız; dotnet ile test edilir |
-| Görünümler, uygulama | `NovaForge.Tiltwell` | `TiltwellApp`, `GameplayView`, `MainMenuView`, `LevelSelectView`, `BoardView`, `SwipeInput` |
+| Görünümler, uygulama | `NovaForge.Tiltwell` | `TiltwellApp`, `GameplayView`, `MainMenuView`, `LevelMapView` + `LevelMapNode`, `BoardView`, `SwipeInput` |
 | Sahne üretici | `NovaForge.Tiltwell.Editor` | NOVAFORGE ▸ Tiltwell ▸ Build Game Scene |
 
 Sahne elle yapılmaz; builder koddan üretir (`Assets/Tiltwell/Tiltwell.unity`) ve tek build sahnesi yapar.
+
+## Ekranlar
+- **Ana menü:** para/ipucu chip'leri, ayarlar, gradyanlı logo, süzülen damlalar, eğik mini tahta, nefes alan "Oyna · Bölüm N", alt sırada Bölümler / Mağaza / Günlük Ödül.
+- **Bölüm haritası (`levels`):** alttan yukarı kıvrılan yol (`UIPolyline`). Geçilen kısım altın, kalan kesik çizgi. Her kademe ayrı renkli "Dünya N" bölgesi ve afişi.
+  Kilitli bölüm gri + kilit, geçilen bölüm yıldızlı, aktif bölümde nabız halkası + süzülen işaretçi. Açılışta aktif bölüme kayar.
+- **Oyun:** beyaz panelli tahta, kabarık duvarlar, derin delikler, parlayan kuyular, parlak/gölgeli damlalar, kayarken esneme,
+  birleşme/teslimde parçacık. Üstte ev, bölüm ve hamle chip'leri, rozetli ipucu; altta geri al / baştan; mesaj balonu.
+- Sonuç, günlük ödül, mağaza, ayarlar Core'un temalı ekranları (konfeti, sırayla yıldız).
 
 ## Bölümler
 `Runtime/Levels/levels.json`: 36 bölüm, 5 kademe, seed `20261123`. Her bölüm BFS solver ile çözülebilirliği ve par değeri doğrulanmış olarak üretilir:
@@ -37,6 +45,6 @@ Release build için `privacyPolicyUrl` (https) zorunlu; yoksa Core doğrulaması
 
 ## Eksikler (dürüst liste)
 - Ses dosyası yok: `AudioLibrary` atanmamış, oyun sessiz çalışır.
-- Görseller koddan üretilen daire/yuvarlak kare sprite'lar; ikon, splash ve mağaza görselleri yok.
-- Japonca/Korece karakterler varsayılan TMP fontunda yok (Noto fallback gerekli).
+- Uygulama ikonu, splash ve mağaza görselleri yok.
+- Japonca/Korece karakterler Nunito'da yok (Noto fallback gerekli).
 - Cihazda oynanmadı; dokunmatik his ve performans doğrulanmadı.

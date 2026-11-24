@@ -35,17 +35,19 @@ Cihazda henüz çalıştırılmadı: titreşim, gerçek reklam, gerçek ses çı
 Detay: [TILTWELL.md](TILTWELL.md). 36 solver-doğrulamalı bölüm, ana menü, bölüm seçimi, oyun ekranı (swipe, geri al, yeniden başlat, ipucu,
 ekstra hamle reklamı), sonuç/günlük ödül/mağaza/ayarlar Core ekranlarından. Sahne builder ile üretiliyor.
 Testler: EditMode 141/141, PlayMode 10/10 (uçtan uca bölüm çözme dahil), dotnet 118 + 22. Android + iOS player derlemesi temiz.
-Eksik: ses dosyaları, ikon/mağaza görselleri, JP/KR font, cihaz testi.
+Görsel yenileme (2026-11-24): `UITheme` + Nunito/Material Icons, kabarık butonlar, yol haritası, yeni oyun ekranı. Editörde render edilip kontrol edildi.
+Testler: EditMode 142/142, PlayMode 10/10, dotnet 119 + 22.
+Eksik: ses dosyaları, uygulama ikonu/mağaza görselleri, JP/KR font.
 
 ## Sıradaki fazlar (yapılmadı)
 | Faz | İçerik | Ön koşul |
 |---|---|---|
 | 2 | ✅ Sandbox projesi, Core testleri Unity'de, Unity köprüsü + AdMob derlemesi | — |
-| 3 | ✅ UI + hazır ekranlar + ses. Kalan: tema, (pooling, mixer), Input (tap/swipe/drag/long-press), Scene transitions, Addressables | Faz 2 |
+| 3 | ✅ UI + hazır ekranlar + ses + tema. Kalan: (pooling, mixer), Input (tap/swipe/drag/long-press), Scene transitions, Addressables | Faz 2 |
 | 4 | SDK adaptörleri: Unity IAP 5.x, AdMob cihaz testi, Firebase Analytics/Remote Config/Crashlytics, Google UMP + iOS ATT | Faz 2 + hesaplar |
 | 5 | Editor araçları: NOVAFORGE menüsü, Create New Game, validators (config/monetization/localization), Level Editor, build config | Faz 3 |
 | 6 | Oyun şablonları (Puzzle, Arcade, Hypercasual, Idle, Simulation) | Faz 3-5 |
-| 7 | ✅ Tiltwell oynanabilir. Kalan: ses, görseller, cihaz testi, mağaza materyali | Faz 3-5 |
+| 7 | ✅ Tiltwell oynanabilir, cihazda çalıştı, temalı. Kalan: ses, ikon, mağaza materyali | Faz 3-5 |
 | 8 | Satın alma doğrulama backend'i, sandbox testleri, BUILD_AND_RELEASE süreci | Faz 4 |
 
 Henüz yazılmayan dokümanlar (ilgili sistemle birlikte gelecek; boş placeholder üretilmedi):

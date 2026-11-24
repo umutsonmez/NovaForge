@@ -22,12 +22,14 @@ namespace NovaForge.Tiltwell.Unity
         public const string Tutorial = "tiltwell.tutorial";
         public const string TutorialMix = "tiltwell.tutorial_mix";
         public const string AllDone = "tiltwell.all_done";
+        public const string WorldN = "tiltwell.world_n";
 
         private static readonly string[] Keys =
         {
             Title, Play, PlayLevel, Levels, LevelN, Moves, Undo, Restart, Hint, Stuck, NoHints, OutOfMovesTitle,
             ExtraMovesOffer, Tutorial, TutorialMix, AllDone,
             "resource.coin", "resource.hint", "shop.hints_3", "shop.hints_10",
+            WorldN,
         };
 
         private static readonly Dictionary<string, string[]> Values = new Dictionary<string, string[]>
@@ -41,6 +43,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Drops that collide mix their colors. Fill each well with its color.",
                 "You finished every level!",
                 "Coins", "Hints", "3 Hints", "10 Hints",
+                "World {0}",
             },
             [Languages.Turkish] = new[]
             {
@@ -51,6 +54,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Çarpışan damlaların renkleri karışır. Her kuyuyu kendi rengiyle doldur.",
                 "Bütün bölümleri bitirdin!",
                 "Altın", "İpucu", "3 İpucu", "10 İpucu",
+                "Dünya {0}",
             },
             [Languages.German] = new[]
             {
@@ -61,6 +65,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Tropfen, die zusammenstoßen, mischen ihre Farben. Fülle jeden Brunnen mit seiner Farbe.",
                 "Du hast alle Level geschafft!",
                 "Münzen", "Tipps", "3 Tipps", "10 Tipps",
+                "Welt {0}",
             },
             [Languages.French] = new[]
             {
@@ -71,6 +76,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Les gouttes qui se rencontrent mélangent leurs couleurs. Remplissez chaque puits de sa couleur.",
                 "Vous avez terminé tous les niveaux !",
                 "Pièces", "Indices", "3 indices", "10 indices",
+                "Monde {0}",
             },
             [Languages.Spanish] = new[]
             {
@@ -81,6 +87,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Las gotas que chocan mezclan sus colores. Llena cada pozo con su color.",
                 "¡Has completado todos los niveles!",
                 "Monedas", "Pistas", "3 pistas", "10 pistas",
+                "Mundo {0}",
             },
             [Languages.Portuguese] = new[]
             {
@@ -91,6 +98,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Gotas que se encontram misturam as cores. Encha cada poço com a sua cor.",
                 "Você concluiu todas as fases!",
                 "Moedas", "Dicas", "3 dicas", "10 dicas",
+                "Mundo {0}",
             },
             [Languages.Japanese] = new[]
             {
@@ -101,6 +109,7 @@ namespace NovaForge.Tiltwell.Unity
                 "ぶつかったしずくは色が混ざります。それぞれの井戸を同じ色で満たそう。",
                 "全レベルクリア！",
                 "コイン", "ヒント", "ヒント3個", "ヒント10個",
+                "ワールド {0}",
             },
             [Languages.Korean] = new[]
             {
@@ -111,6 +120,7 @@ namespace NovaForge.Tiltwell.Unity
                 "부딪힌 물방울은 색이 섞입니다. 각 우물을 같은 색으로 채우세요.",
                 "모든 레벨을 완료했습니다!",
                 "코인", "힌트", "힌트 3개", "힌트 10개",
+                "월드 {0}",
             },
         };
 

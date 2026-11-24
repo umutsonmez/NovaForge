@@ -80,7 +80,20 @@ namespace NovaForge.UI
                 row.buyButton.onClick.AddListener(() => OnBuy(item));
             }
             if (row.priceLabel != null)
-                row.priceLabel.text = limitReached ? loc.Get(CoreStrings.ShopOwned) : Core.Shop.GetDisplayPrice(item.Id);
+                row.priceLabel.text = limitReached ? loc.Get(CoreStrings.ShopOwned) : PriceText(item, loc);
+        }
+
+        /// <summary>Store price for IAP items ("…" until the store answers), "150 Coins" for soft-currency items.</summary>
+        private string PriceText(ShopItem item, LocalizationService loc)
+        {
+            if (item.IsRealMoney) return Core.Shop.GetDisplayPrice(item.Id) ?? "…";
+            var sb = new System.Text.StringBuilder();
+            foreach (var cost in item.SoftPrice)
+            {
+                if (sb.Length > 0) sb.Append(" + ");
+                sb.Append(CurrencyDisplay.FormatCompact(cost.Amount)).Append(' ').Append(RewardText.ResourceName(cost.ResourceId, loc));
+            }
+            return sb.ToString();
         }
 
         private async void OnBuy(ShopItem item)
