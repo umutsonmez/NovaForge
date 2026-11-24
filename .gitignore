@@ -45,3 +45,6 @@ Projects/*/*.csproj
 Projects/*/*.sln
 Projects/*/*.slnx
 Projects/*/TestResults*.xml
+
+# Unity Android native build intermediates
+.utmp/
