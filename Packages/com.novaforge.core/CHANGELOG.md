@@ -3,6 +3,9 @@ All notable changes to `com.novaforge.core` are documented here. Format: [Keep a
 
 ## [Unreleased]
 ### Changed
+- **Fix (AdMob, found on device):** SDK callbacks are marshalled through the main-thread `SynchronizationContext` captured at construction. `MobileAdsEventExecutor` is pumped by an object the plugin creates in `MobileAds.Initialize`, so UMP callbacks arriving before that never ran and ads never initialized.
+- `AdMobAdsProvider.Log` is settable (set it to `core.Log` in `OnCoreBuilt`); UMP start/result is logged.
+- `LevelResultView` dims unearned stars instead of hiding them.
 - `NovaForgeCore.InitializeAsync` no longer waits for the ads provider: consent/SDK callbacks that never arrive (offline, editor) blocked the game from starting. New `AdsInitialization` task completes when ads are ready.
 - UI and Unity MonoBehaviours split into one file per class (`Widgets.cs`, `StandardViews.cs`, `GameViews.cs` removed): scene/prefab references to them now serialize.
 - `UIManager` missing-view error lists the known view ids.

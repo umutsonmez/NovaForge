@@ -1,0 +1,23 @@
+# ninja log v5
+33	2831	8172074925325922	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	cbf9e601cb902117
+145	691	8172074903980425	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	9717ae8ec2f57ecc
+2	2564	8172074922675519	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	56313d328500194
+102	2542	8172074922380216	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	c04fafb6ae1cdd8c
+694	1085	8172074907637633	C:/Users/mubit/Desktop/Umut/NOVAFORGE/Projects/Sandbox/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/3n2u203j/obj/arm64-v8a/libswappywrapper.so	559f7e49094dad15
+123	2740	8172074924456876	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	618214d8a40b2f57
+19	2511	8172074922087220	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	4a50c40ace8a332
+66	2526	8172074922217175	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	addd818a3c7a46b9
+84	2534	8172074922242240	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	ed8f46fbac27ff82
+48	2766	8172074924681522	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	8c6881698e291981
+2831	3001	8172074927058680	C:/Users/mubit/Desktop/Umut/NOVAFORGE/Projects/Sandbox/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/3n2u203j/obj/arm64-v8a/libgame.so	50909943e3672608
+224	600	8172078222233494	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	9717ae8ec2f57ecc
+601	1088	8172078226849732	C:/Users/mubit/Desktop/Umut/NOVAFORGE/Projects/Sandbox/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/3n2u203j/obj/arm64-v8a/libswappywrapper.so	559f7e49094dad15
+13	2458	8172078240872555	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	addd818a3c7a46b9
+27	2462	8172078240847396	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	4a50c40ace8a332
+112	2476	8172078241018547	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	ed8f46fbac27ff82
+53	2535	8172078241641757	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	56313d328500194
+134	2583	8172078242162148	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	c04fafb6ae1cdd8c
+170	2656	8172078242916868	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	618214d8a40b2f57
+91	2710	8172078243447504	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	8c6881698e291981
+71	2819	8172078244523281	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	cbf9e601cb902117
+2819	3001	8172078246379737	C:/Users/mubit/Desktop/Umut/NOVAFORGE/Projects/Sandbox/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/Debug/3n2u203j/obj/arm64-v8a/libgame.so	50909943e3672608

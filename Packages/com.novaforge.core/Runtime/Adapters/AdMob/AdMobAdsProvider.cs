@@ -2,6 +2,7 @@
 // Compiled successfully against com.google.ads.mobile 11.7.0 in Unity 6000.3.29f1 (2026-11-23).
 // Runtime behaviour (real ads, consent form) still needs an on-device test.
 using System;
+using System.Threading;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GoogleMobileAds.Api;
@@ -32,8 +33,11 @@ namespace NovaForge.Ads.AdMob
     ///
     /// Startup order (per Google docs): UMP consent update → consent form if required → CanRequestAds()
     /// → RequestConfiguration → MobileAds.Initialize → load ads. No ad is requested before CanRequestAds() is true.
-    /// Every SDK callback is marshalled to the Unity main thread with MobileAdsEventExecutor.ExecuteInUpdate
-    /// (plugin 11.7 obsoleted MobileAds.RaiseAdEventsOnUnityMainThread).
+    /// Every SDK callback is marshalled to the Unity main thread through the SynchronizationContext captured at
+    /// construction (Unity's player loop context). MobileAdsEventExecutor is only a fallback: its queue is pumped by
+    /// an object the plugin creates during MobileAds.Initialize, so UMP callbacks that arrive before that were never
+    /// executed (seen on device and in the editor: start-up stalled after "Consent Info updated").
+    /// Construct on the main thread.
     /// </summary>
     public sealed class AdMobAdsProvider : IAdsProvider, IPrivacyOptionsProvider
     {
@@ -42,7 +46,8 @@ namespace NovaForge.Ads.AdMob
         private readonly AdUnitIds _ids;
         private readonly AdMobSettings _settings;
         private readonly bool _isRelease;
-        private readonly ILog _log;
+        private ILog _log;
+        private readonly SynchronizationContext _main;
 
         private AdPrivacyOptions _privacy;
         private bool _initialized;
@@ -61,12 +66,16 @@ namespace NovaForge.Ads.AdMob
         public event Action<AdFormat, long, string> AdRevenuePaid;
 
         public string Name => "admob";
+
+        /// <summary>Logger; set to the Core log once Core exists (the provider is created before Core).</summary>
+        public ILog Log { get => _log; set => _log = value ?? NullLog.Instance; }
         public bool PrivacyOptionsRequired { get; private set; }
 
         public AdMobAdsProvider(AdMobSettings settings, bool isReleaseBuild, ILog log)
         {
             _settings = settings;
             _isRelease = isReleaseBuild;
+            _main = SynchronizationContext.Current;
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _ids = AdUnitIds.Resolve(settings, isReleaseBuild);
             if (_ids.AreTestIds) _log.Info(Tag, "Using Google TEST ad units (development build).");
@@ -77,7 +86,9 @@ namespace NovaForge.Ads.AdMob
         public async Task<bool> InitializeAsync(AdPrivacyOptions privacy)
         {
             _privacy = privacy;
+            _log.Info(Tag, "UMP: requesting consent info update.");
             var consent = await GatherConsentAsync();
+            _log.Info(Tag, $"UMP done: canRequestAds={consent.CanRequestAds}, privacyOptionsRequired={consent.PrivacyOptionsRequired}, error={consent.Error ?? "none"}");
             PrivacyOptionsRequired = consent.PrivacyOptionsRequired;
             ConsentResolved?.Invoke(consent);
             if (!consent.CanRequestAds)
@@ -274,7 +285,11 @@ namespace NovaForge.Ads.AdMob
         // ------------------------------------------------------------------ helpers
 
         /// <summary>SDK callbacks may arrive on a background thread; run them in the next Unity Update.</summary>
-        private static void OnMain(Action action) => MobileAdsEventExecutor.ExecuteInUpdate(action);
+        private void OnMain(Action action)
+        {
+            if (_main != null) _main.Post(_ => action(), null);
+            else MobileAdsEventExecutor.ExecuteInUpdate(action);
+        }
 
         private void ReportPaid(AdFormat format, AdValue value)
         {

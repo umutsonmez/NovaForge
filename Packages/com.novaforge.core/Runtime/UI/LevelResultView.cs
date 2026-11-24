@@ -38,7 +38,7 @@ namespace NovaForge.UI
     public sealed class LevelResultView : UIView
     {
         [SerializeField] private TMP_Text title;
-        [Tooltip("Star objects in order; the first N are activated for N stars.")]
+        [Tooltip("Star objects in order. Earned stars keep their color; unearned ones are dimmed (or hidden if they have no Graphic).")]
         [SerializeField] private GameObject[] stars = Array.Empty<GameObject>();
         [SerializeField] private TMP_Text rewardLabel;
         [SerializeField] private Button nextButton;
@@ -59,6 +59,25 @@ namespace NovaForge.UI
             if (doubleRewardButton != null) doubleRewardButton.onClick.AddListener(OnDoubleReward);
         }
 
+        [SerializeField, Range(0f, 1f)] private float unearnedStarAlpha = 0.18f;
+        private Color[] _starColors;
+
+        private void SetStar(int i, bool won, bool earned)
+        {
+            var star = stars[i];
+            if (star == null) return;
+            if (_starColors == null)
+            {
+                _starColors = new Color[stars.Length];
+                for (int k = 0; k < stars.Length; k++)
+                    _starColors[k] = stars[k] != null && stars[k].TryGetComponent<Graphic>(out var gk) ? gk.color : Color.white;
+            }
+            if (!star.TryGetComponent<Graphic>(out var g)) { star.SetActive(earned); return; }
+            star.SetActive(won); // a lost level shows no star row at all
+            var c = _starColors[i];
+            g.color = earned ? c : new Color(c.r, c.g, c.b, c.a * unearnedStarAlpha);
+        }
+
         protected override void OnShowing(object args)
         {
             _hasResult = args is LevelSessionEnded;
@@ -69,7 +88,7 @@ namespace NovaForge.UI
 
             if (title != null) title.text = loc.Get(won ? CoreStrings.WinTitle : CoreStrings.LoseTitle);
             int starCount = won && _result.Completion != null ? _result.Completion.Stars : 0;
-            for (int i = 0; i < stars.Length; i++) if (stars[i] != null) stars[i].SetActive(i < starCount);
+            for (int i = 0; i < stars.Length; i++) SetStar(i, won, i < starCount);
             RenderReward();
             if (nextButton != null) nextButton.gameObject.SetActive(won);
             if (retryButton != null) retryButton.gameObject.SetActive(!won);

@@ -94,7 +94,11 @@ namespace NovaForge.Tiltwell.Unity
         protected override void OnCoreBuilt(NovaForgeCore core)
         {
 #if TILTWELL_ADMOB
-            if (_admob != null) AdMobConsentBridge.Connect(_admob, core.Consent);
+            if (_admob != null)
+            {
+                _admob.Log = core.Log;
+                AdMobConsentBridge.Connect(_admob, core.Consent);
+            }
 #endif
         }
 

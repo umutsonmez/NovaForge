@@ -67,6 +67,15 @@ namespace NovaForge.Tiltwell.Editor
             UIMenu.CreateLevelResultPopup();
             UIMenu.CreateDailyRewardPopup();
 
+            // Star sprites everywhere a "StarN" image exists (result popup, level select).
+            foreach (var img in root.GetComponentsInChildren<Image>(true))
+                if (img.name.StartsWith("Star") && img.name.Length == 5)
+                {
+                    img.sprite = TiltwellVisualsEditor.StarAsset();
+                    img.preserveAspect = true;
+                    img.color = TiltwellVisuals.Of(Paint.Yellow);
+                }
+
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -310,6 +319,53 @@ namespace NovaForge.Tiltwell.Editor
     internal static class TiltwellVisualsEditor
     {
         private const string Path = "Assets/Tiltwell/Circle.png";
+
+        private const string StarPath = "Assets/Tiltwell/Star.png";
+
+        /// <summary>Five-point star, anti-aliased by 4x4 supersampling.</summary>
+        public static Sprite StarAsset()
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<Sprite>(StarPath);
+            if (existing != null) return existing;
+            System.IO.Directory.CreateDirectory("Assets/Tiltwell");
+            const int size = 128;
+            var pts = new Vector2[10];
+            for (int i = 0; i < 10; i++)
+            {
+                float a = Mathf.PI / 2f + i * Mathf.PI / 5f;
+                float r = (i % 2 == 0 ? 0.48f : 0.2f) * size;
+                pts[i] = new Vector2(size / 2f + Mathf.Cos(a) * r, size / 2f + Mathf.Sin(a) * r - size * 0.03f);
+            }
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    int hits = 0;
+                    for (int sy = 0; sy < 4; sy++)
+                        for (int sx = 0; sx < 4; sx++)
+                            if (Inside(pts, new Vector2(x + (sx + 0.5f) / 4f, y + (sy + 0.5f) / 4f))) hits++;
+                    tex.SetPixel(x, y, new Color(1, 1, 1, hits / 16f));
+                }
+            System.IO.File.WriteAllBytes(StarPath, tex.EncodeToPNG());
+            Object.DestroyImmediate(tex);
+            AssetDatabase.ImportAsset(StarPath);
+            var importer = (TextureImporter)AssetImporter.GetAtPath(StarPath);
+            importer.textureType = TextureImporterType.Sprite;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = false;
+            importer.SaveAndReimport();
+            return AssetDatabase.LoadAssetAtPath<Sprite>(StarPath);
+        }
+
+        private static bool Inside(Vector2[] poly, Vector2 p)
+        {
+            bool inside = false;
+            for (int i = 0, j = poly.Length - 1; i < poly.Length; j = i++)
+                if ((poly[i].y > p.y) != (poly[j].y > p.y) &&
+                    p.x < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)
+                    inside = !inside;
+            return inside;
+        }
 
         public static Sprite CircleAsset()
         {
