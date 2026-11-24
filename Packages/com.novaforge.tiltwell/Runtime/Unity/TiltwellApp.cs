@@ -40,6 +40,15 @@ namespace NovaForge.Tiltwell.Unity
         public List<LevelData> Levels { get; private set; }
 
         private IDisposable _resultSub;
+        private NovaForge.Core.Data.SaveSlot<DailyPuzzleState> _dailySlot;
+        private System.Threading.Tasks.Task<LevelData> _dailyTask;
+        private int _dailyTaskDay;
+
+        /// <summary>Daily puzzle streak (loaded when Core is ready).</summary>
+        public DailyPuzzleState Daily { get; private set; } = new DailyPuzzleState();
+
+        /// <summary>Today's day number in the player's local calendar.</summary>
+        public int Today => DailyPuzzle.DayNumber(Core.Clock.UtcNow.ToLocalTime());
 #if TILTWELL_ADMOB
         private AdMobAdsProvider _admob;
 #endif
@@ -109,6 +118,9 @@ namespace NovaForge.Tiltwell.Unity
         protected override void OnCoreReady(NovaForgeCore core)
         {
             _resultSub = core.Events.Subscribe<LevelResultChosen>(OnResultChosen);
+            _dailySlot = new NovaForge.Core.Data.SaveSlot<DailyPuzzleState>(core.Saves, "tiltwell_daily", 1, () => new DailyPuzzleState());
+            Daily = _dailySlot.Load().Data;
+            GetDailyAsync(Today); // warm up: generate today's puzzle in the background
             IsReady = true;
             if (UIManager.Instance != null) UIManager.Instance.Navigation.ResetToAsync(ViewIds.MainMenu).Forget();
         }
@@ -118,6 +130,27 @@ namespace NovaForge.Tiltwell.Unity
             _resultSub?.Dispose();
             if (Instance == this) Instance = null;
             base.OnDestroy();
+        }
+
+        /// <summary>Today's (or any day's) puzzle, generated once on a worker thread and cached.</summary>
+        public System.Threading.Tasks.Task<LevelData> GetDailyAsync(int day)
+        {
+            if (_dailyTask == null || _dailyTaskDay != day || _dailyTask.IsFaulted)
+            {
+                _dailyTaskDay = day;
+                _dailyTask = System.Threading.Tasks.Task.Run(() => DailyPuzzle.Generate(day));
+            }
+            return _dailyTask;
+        }
+
+        /// <summary>Marks a day's puzzle as solved and pays the streak reward. Returns the coins (0 if already done).</summary>
+        public int CompleteDaily(int day)
+        {
+            if (!Daily.Complete(day)) return 0;
+            _dailySlot?.Save(Daily);
+            int coins = DailyPuzzle.Reward(Daily.Streak);
+            var tx = new EconomyTransaction("daily_puzzle:" + day, "daily_puzzle").Credit("coin", coins);
+            return Core.Economy.Apply(tx) == TransactionStatus.Success ? coins : 0;
         }
 
         /// <summary>First level not completed yet (or the last level when everything is done).</summary>

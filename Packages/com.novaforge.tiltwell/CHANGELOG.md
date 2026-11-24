@@ -17,6 +17,10 @@
   - World 6 sticky, 8 arrows, 9 paint pads, 10 all of them. Tiers 6-10 were regenerated.
   - `BoardView` draws the new floors and recolors painted drops.
   - A one-line hint appears on the first level that uses each floor.
+- Daily puzzle:
+  - `DailyPuzzle` (seeded per day, a different twist each day) and `DailyPuzzleState` (streak).
+  - "Puzzle" button with a badge on the main menu. Gameplay daily mode skips level progression and pays a streak reward.
+  - The main menu nav row now has 4 buttons, spread by screen width.
 - Fix: the hint arrow no longer carries over to the next level.
 - Sound: `TiltwellSoundBuilder` synthesizes 10 effects and a seamless music loop into `Runtime/Audio`, plus the `AudioLibrary`. Gameplay plays slide, bump, merge, deliver and fall sounds. `BoardView.Animate` takes a `landed` callback. Haptics fire on landing.
 

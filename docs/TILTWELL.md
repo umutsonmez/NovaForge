@@ -48,6 +48,12 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 ```
 `LevelPackTests` gönderilen her bölümü solver ile yeniden çözer; par tutmazsa test kırılır.
 
+## Günlük bulmaca
+- Ana menüde "Bulmaca" butonu. Bugünün bulmacası açıksa rozette "!", çözüldüyse seri sayısı görünür.
+- `DailyPuzzle.Generate(gün)`: gün numarasından seed üretir; herkese aynı bulmaca. Haftanın gününe göre değişen bir özellik içerir (karışım, yapışkan, kahverengi, ok, boya). Solver ile doğrulanır ve cihazda arka thread'de üretilir.
+- Çözünce `30 + 10 × seri` altın verir (seri en fazla 7 sayılır). Seri art arda günlerde artar, bir gün kaçarsa 1'e döner (`DailyPuzzleState`, kayıt slotu `tiltwell_daily`).
+- Bölüm ilerlemesine sayılmaz. Hamle bitince kaybetme ekranı çıkmaz; baştan başlanır.
+
 ## Ses ve titreşim
 - Tüm sesler kodla sentezlenir (`Editor/TiltwellSoundBuilder`, menü NOVAFORGE ▸ Tiltwell ▸ Regenerate Sounds). Çıktı `Runtime/Audio/*.wav` ve `TiltwellAudio.asset`; üçüncü parti ses yok, lisans derdi yok.
 - Efektler: tıklama, popup, kayma, duvara çarpma, birleşme, kuyuya girme, deliğe düşme, coin, kazanma, kaybetme. Müzik: 20 sn'lik dikişsiz döngü (C–Am–F–G, 96 bpm).
@@ -59,7 +65,7 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 Release build için `privacyPolicyUrl` (https) zorunlu; yoksa Core doğrulaması başlatmayı durdurur.
 
 ## Testler
-- dotnet: 28 test (kural, solver, oturum, renk tarifi, özel zemin).
+- dotnet: 31 test (kural, solver, oturum, renk tarifi, özel zemin, günlük bulmaca).
 - Unity PlayMode `TiltwellPlayTests`: gerçek sahne; günlük ödül popup'ı → Play → bölüm 1'i solver hamleleriyle çöz → 3 yıldız + coin → Next ile bölüm 2. Ayrıca geri al ve ipucu harcama.
 
 ## Eksikler (dürüst liste)

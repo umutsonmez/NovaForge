@@ -173,9 +173,11 @@ namespace NovaForge.Tiltwell.Editor
             pso.FindProperty("amount").floatValue = 0.035f;
             pso.ApplyModifiedPropertiesWithoutUndo();
 
-            var levels = NavButton(t, "Levels", UIIcons.Map, UIButtonStyle.Primary, TiltwellStrings.Levels, -290f);
-            var shop = NavButton(t, "Shop", UIIcons.Store, UIButtonStyle.Accent, CoreStrings.ShopTitle, 0f);
-            var daily = NavButton(t, "Daily", UIIcons.Gift, UIButtonStyle.Danger, CoreStrings.DailyTitle, 290f);
+            var levels = NavButton(t, "Levels", UIIcons.Map, UIButtonStyle.Primary, TiltwellStrings.Levels, 0);
+            var puzzle = NavButton(t, "Puzzle", UIIcons.Star, UIButtonStyle.Success, TiltwellStrings.DailyPuzzle, 1);
+            var puzzleBadge = UIMenu.Badge(puzzle.transform, "Badge", 64);
+            var shop = NavButton(t, "Shop", UIIcons.Store, UIButtonStyle.Accent, CoreStrings.ShopTitle, 2);
+            var daily = NavButton(t, "Daily", UIIcons.Gift, UIButtonStyle.Danger, CoreStrings.DailyTitle, 3);
 
             var so = new SerializedObject(view);
             so.FindProperty("playLabel").objectReferenceValue = playLabel;
@@ -184,6 +186,8 @@ namespace NovaForge.Tiltwell.Editor
             so.FindProperty("shopButton").objectReferenceValue = shop;
             so.FindProperty("settingsButton").objectReferenceValue = settings;
             so.FindProperty("dailyButton").objectReferenceValue = daily;
+            so.FindProperty("puzzleButton").objectReferenceValue = puzzle;
+            so.FindProperty("puzzleBadge").objectReferenceValue = puzzleBadge;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
@@ -252,18 +256,25 @@ namespace NovaForge.Tiltwell.Editor
             return root;
         }
 
-        private static Button NavButton(Transform parent, string name, string icon, UIButtonStyle style, string key, float x)
+        /// <summary>Round nav button with a label under it. <paramref name="slot"/> 0..count-1 spreads them across the width.</summary>
+        private static Button NavButton(Transform parent, string name, string icon, UIButtonStyle style, string key, int slot, int count = 4)
         {
-            var b = UIMenu.IconButton(parent, name, icon, style, 170);
-            UIMenu.Place((RectTransform)b.transform, new Vector2(0.5f, 0), new Vector2(x, 150), new Vector2(170, 170));
+            var anchor = new Vector2((slot + 0.5f) / count, 0);
+            var b = UIMenu.IconButton(parent, name, icon, style, 160);
+            UIMenu.Place((RectTransform)b.transform, anchor, new Vector2(0, 150), new Vector2(160, 160));
             ((RectTransform)b.transform).pivot = new Vector2(0.5f, 0);
-            var label = UIMenu.Text(parent, name + "Label", name, 38, FontStyles.Bold, 60);
+            var label = UIMenu.Text(parent, name + "Label", name, 34, FontStyles.Bold, 60);
             UIMenu.Localized(label, key);
             label.enableAutoSizing = true;
-            label.fontSizeMin = 26;
-            label.fontSizeMax = 38;
-            UIMenu.Place(label.rectTransform, new Vector2(0.5f, 0), new Vector2(x, 80), new Vector2(270, 60));
+            label.fontSizeMin = 20;
+            label.fontSizeMax = 34;
+            label.textWrappingMode = TextWrappingModes.NoWrap;
+            UIMenu.Place(label.rectTransform, anchor, new Vector2(0, 84), new Vector2(240, 56));
             label.rectTransform.pivot = new Vector2(0.5f, 0);
+            label.rectTransform.anchorMin = new Vector2(anchor.x - 0.5f / count, 0);
+            label.rectTransform.anchorMax = new Vector2(anchor.x + 0.5f / count, 0);
+            label.rectTransform.sizeDelta = new Vector2(-12, 56);
+            label.rectTransform.anchoredPosition = new Vector2(0, 84);
             return b;
         }
 

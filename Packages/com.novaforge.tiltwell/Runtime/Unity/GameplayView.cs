@@ -37,6 +37,13 @@ namespace NovaForge.Tiltwell.Unity
         public const string Music = "music_main";
     }
 
+    /// <summary>Gameplay args for the daily puzzle (instead of a level id).</summary>
+    public sealed class DailyArgs
+    {
+        public LevelData Level;
+        public int Day;
+    }
+
     /// <summary>One-time tutorials (stored by Core's TutorialService).</summary>
     public static class TiltwellTutorials
     {
@@ -75,6 +82,7 @@ namespace NovaForge.Tiltwell.Unity
         private bool _finished;
         private IDisposable _balanceSub;
         private bool _guided;
+        private DailyArgs _daily;
         private readonly List<GameObject> _recipes = new List<GameObject>();
 
         public PuzzleSession Session => _session;
@@ -95,10 +103,11 @@ namespace NovaForge.Tiltwell.Unity
         protected override void OnShowing(object args)
         {
             var app = TiltwellApp.Instance;
-            var levelId = args as string ?? app.NextPlayableLevelId();
-            var level = app.Levels.Find(l => l.Id == levelId) ?? throw new KeyNotFoundException(levelId);
+            _daily = args as DailyArgs;
+            var levelId = _daily != null ? _daily.Level.Id : args as string ?? app.NextPlayableLevelId();
+            var level = _daily != null ? _daily.Level : app.Levels.Find(l => l.Id == levelId) ?? throw new KeyNotFoundException(levelId);
             Core.LevelSession.Quit(); // ends any attempt that was left open (app returns here after Next/Retry)
-            Core.LevelSession.Start(levelId);
+            if (_daily == null) Core.LevelSession.Start(levelId); // the daily is outside level progression
             _session = new PuzzleSession(level);
             _finished = false;
             _queued = null;
@@ -106,7 +115,8 @@ namespace NovaForge.Tiltwell.Unity
             Canvas.ForceUpdateCanvases(); // board rect must have its final size before building
             board.Build(_session.Board, _session.State);
             int index = Core.Progression.Catalog.IndexOf(levelId);
-            levelLabel.text = Core.Localization.Format(TiltwellStrings.LevelN, index + 1);
+            levelLabel.text = _daily != null ? Core.Localization.Get(TiltwellStrings.DailyPuzzle)
+                : Core.Localization.Format(TiltwellStrings.LevelN, index + 1);
             ShowMessage(index == 0 ? TiltwellStrings.Tutorial
                 : level.Tier == 2 && IsFirstOfTier(app, level) ? TiltwellStrings.TutorialMix
                 : IsFirstBrownLevel(app, level) ? TiltwellStrings.TutorialBrown
@@ -274,6 +284,11 @@ namespace NovaForge.Tiltwell.Unity
         {
             switch (_session.Status)
             {
+                case PuzzleStatus.Solved when _daily != null:
+                    _finished = true;
+                    _queued = null;
+                    await FinishDaily();
+                    break;
                 case PuzzleStatus.Solved:
                     _finished = true;
                     _queued = null;
@@ -292,6 +307,25 @@ namespace NovaForge.Tiltwell.Unity
                     break;
             }
             RefreshHud();
+        }
+
+        private async Task FinishDaily()
+        {
+            var app = TiltwellApp.Instance;
+            int coins = app.CompleteDaily(_daily.Day);
+            Sfx(SoundIds.Win);
+            Haptics.Play(HapticStrength.Medium);
+            await Task.Delay(350);
+            if (this == null) return;
+            await UIManager.Instance.ConfirmAsync(new ConfirmRequest
+            {
+                TitleKey = TiltwellStrings.DailyDoneTitle,
+                MessageKey = coins > 0 ? TiltwellStrings.DailyDoneText : TiltwellStrings.DailyComeBack,
+                MessageArgs = new object[] { coins, app.Daily.Streak },
+                ConfirmKey = CoreStrings.Ok,
+                CancelKey = null,
+            });
+            if (this != null) await Navigation.ResetToAsync(ViewIds.MainMenu);
         }
 
         private async Task OfferExtraMovesOrLose()
@@ -314,6 +348,11 @@ namespace NovaForge.Tiltwell.Unity
                     if (this == null) return;
                     if (outcome == RewardedAdOutcome.RewardGranted) { RefreshHud(); return; }
                 }
+            }
+            if (_daily != null)
+            {
+                ShowMessage(TiltwellStrings.OutOfMovesTitle); // the daily never fails: restart and try again
+                return;
             }
             _finished = true;
             var ended = Core.LevelSession.Lose("out_of_moves");
@@ -355,7 +394,7 @@ namespace NovaForge.Tiltwell.Unity
         private void OnRestart()
         {
             if (_finished || board.IsAnimating || _session.Moves == 0) return;
-            Core.LevelSession.Restart();
+            if (_daily == null) Core.LevelSession.Restart();
             _session.Restart();
             board.Sync(_session.State);
             HideHintArrow();

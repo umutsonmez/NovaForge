@@ -393,4 +393,49 @@ namespace NovaForge.Tiltwell.Tests
             CollectionAssert.AreEqual(new[] { Tilt.Right, Tilt.Down }, sol.Moves);
         }
     }
+
+    public class DailyPuzzleTests
+    {
+        [Test]
+        public void Generate_IsDeterministic_AndSolvable_ForAWeek()
+        {
+            int today = DailyPuzzle.DayNumber(new DateTime(2026, 11, 24));
+            for (int d = today; d < today + 7; d++)
+            {
+                var a = DailyPuzzle.Generate(d);
+                var b = DailyPuzzle.Generate(d);
+                CollectionAssert.AreEqual(a.Rows, b.Rows, "same day, same puzzle");
+                Assert.AreEqual(DailyPuzzle.IdFor(d), a.Id);
+                var (board, start) = Board.Parse(a.Rows);
+                var sol = Solver.Solve(board, start);
+                Assert.IsTrue(sol.Solved, a.Id);
+                Assert.AreEqual(a.Par, sol.Moves.Count, a.Id);
+            }
+            CollectionAssert.AreNotEqual(DailyPuzzle.Generate(today).Rows, DailyPuzzle.Generate(today + 1).Rows);
+        }
+
+        [Test]
+        public void Streak_GrowsOnConsecutiveDays_ResetsAfterAGap()
+        {
+            var s = new DailyPuzzleState();
+            Assert.IsTrue(s.Complete(10));
+            Assert.IsFalse(s.Complete(10), "no double reward");
+            Assert.IsTrue(s.Complete(11));
+            Assert.AreEqual(2, s.Streak);
+            Assert.AreEqual(2, s.CurrentStreak(12), "still alive the next day");
+            Assert.AreEqual(0, s.CurrentStreak(13), "broken after a missed day");
+            Assert.IsTrue(s.Complete(13));
+            Assert.AreEqual(1, s.Streak);
+            Assert.AreEqual(2, s.BestStreak);
+            Assert.AreEqual(3, s.TotalSolved);
+        }
+
+        [Test]
+        public void Reward_GrowsForAWeek()
+        {
+            Assert.AreEqual(40, DailyPuzzle.Reward(1));
+            Assert.AreEqual(100, DailyPuzzle.Reward(7));
+            Assert.AreEqual(100, DailyPuzzle.Reward(30));
+        }
+    }
 }
