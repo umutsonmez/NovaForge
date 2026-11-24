@@ -13,6 +13,7 @@ namespace NovaForge.Tiltwell.Unity
         public const string Levels = "levels";
         public const string ColorGuide = "color_guide";
         public const string WorldChest = "world_chest";
+        public const string Skins = "skins";
     }
 
     /// <summary>

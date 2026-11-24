@@ -24,6 +24,11 @@
 - World chest:
   - `WorldChest`, `WorldChestState` and the `WorldChestView` popup, opened from `OnResultChosen` when a world is cleared.
   - Chest icon on the map banners.
+- Drop skins:
+  - `DropSkin`, `DropSkins` and `SkinState`.
+  - `DropVisual`, shared by `BoardView` and the shop.
+  - `SkinsView` and `SkinCard` popup, opened from the main menu.
+  - Five skins, bought with coins.
 - Level map title pill moved next to the back button (it overlapped the star chip on tall phones).
 - Fix: the hint arrow no longer carries over to the next level.
 - Sound: `TiltwellSoundBuilder` synthesizes 10 effects and a seamless music loop into `Runtime/Audio`, plus the `AudioLibrary`. Gameplay plays slide, bump, merge, deliver and fall sounds. `BoardView.Animate` takes a `landed` callback. Haptics fire on landing.

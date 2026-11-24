@@ -113,6 +113,7 @@ namespace NovaForge.Tiltwell.Unity
             _queued = null;
             HideHintArrow(); // an arrow from the previous level must not carry over
             Canvas.ForceUpdateCanvases(); // board rect must have its final size before building
+            board.Skin = app.Skins.Equipped;
             board.Build(_session.Board, _session.State);
             int index = Core.Progression.Catalog.IndexOf(levelId);
             levelLabel.text = _daily != null ? Core.Localization.Get(TiltwellStrings.DailyPuzzle)

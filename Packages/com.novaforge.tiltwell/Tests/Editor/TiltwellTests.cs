@@ -466,4 +466,22 @@ namespace NovaForge.Tiltwell.Tests
             Assert.GreaterOrEqual(WorldChest.Reward(1).hints, 1);
         }
     }
+
+    public class DropSkinTests
+    {
+        [Test]
+        public void Classic_IsFreeAndOwned_OthersMustBeBought()
+        {
+            var s = new SkinState();
+            Assert.IsTrue(s.Owns(DropSkin.Classic));
+            Assert.AreEqual(0, DropSkins.Price(DropSkin.Classic));
+            Assert.IsFalse(s.Equip(DropSkin.Jelly), "cannot equip unowned");
+            Assert.IsTrue(s.Add(DropSkin.Jelly));
+            Assert.IsFalse(s.Add(DropSkin.Jelly));
+            Assert.IsTrue(s.Equip(DropSkin.Jelly));
+            Assert.AreEqual(DropSkin.Jelly, s.Equipped);
+            foreach (var skin in DropSkins.All)
+                if (skin != DropSkin.Classic) Assert.Greater(DropSkins.Price(skin), 0, skin.ToString());
+        }
+    }
 }

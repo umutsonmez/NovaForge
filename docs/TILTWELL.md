@@ -59,6 +59,13 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 - Ödül: `100 + 50 × dünya` altın ve `1 + dünya / 3` ipucu (`WorldChest.Reward`). Bir kez verilir; açılan sandıklar `tiltwell_chests` slotunda saklanır.
 - Haritadaki dünya afişinin sağında hediye ikonu durur; sandık açılınca tik işaretine döner.
 
+## Damla görünümleri
+- Ana menüde sağ üstte damla butonu açar: `skins` popup'ı.
+- Görünümler: Klasik (bedava), Gözlü 300, Jöle 500, Baloncuk 800, Yıldız 1200 altın.
+- Alınan ve seçili görünüm `tiltwell_skins` slotunda saklanır.
+- Çizim `DropVisual.Create` ile yapılır, tahta ve mağaza aynı kodu kullanır. Sadece gövde renklenir, bu yüzden birleşme ve boya renk değişimi her görünümde çalışır.
+- Elmas şekli boya karolarına ayrıldı; damla görünümlerinde kullanılmaz.
+
 ## Ses ve titreşim
 - Tüm sesler kodla sentezlenir (`Editor/TiltwellSoundBuilder`, menü NOVAFORGE ▸ Tiltwell ▸ Regenerate Sounds). Çıktı `Runtime/Audio/*.wav` ve `TiltwellAudio.asset`; üçüncü parti ses yok, lisans derdi yok.
 - Efektler: tıklama, popup, kayma, duvara çarpma, birleşme, kuyuya girme, deliğe düşme, coin, kazanma, kaybetme. Müzik: 20 sn'lik dikişsiz döngü (C–Am–F–G, 96 bpm).
@@ -70,7 +77,7 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 Release build için `privacyPolicyUrl` (https) zorunlu; yoksa Core doğrulaması başlatmayı durdurur.
 
 ## Testler
-- dotnet: 33 test (kural, solver, oturum, renk tarifi, özel zemin, günlük bulmaca, dünya sandığı).
+- dotnet: 34 test (kural, solver, oturum, renk tarifi, özel zemin, günlük bulmaca, dünya sandığı, görünüm).
 - Unity PlayMode `TiltwellPlayTests`: gerçek sahne; günlük ödül popup'ı → Play → bölüm 1'i solver hamleleriyle çöz → 3 yıldız + coin → Next ile bölüm 2. Ayrıca geri al ve ipucu harcama.
 
 ## Eksikler (dürüst liste)

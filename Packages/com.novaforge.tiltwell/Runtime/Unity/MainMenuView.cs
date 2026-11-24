@@ -27,6 +27,7 @@ namespace NovaForge.Tiltwell.Unity
         [SerializeField] private Button shopButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button dailyButton;
+        [SerializeField] private Button skinsButton;
         [Header("Daily puzzle")]
         [SerializeField] private Button puzzleButton;
         [Tooltip("Badge on the puzzle button: '!' when today's puzzle is open, the streak when done.")]
@@ -41,6 +42,7 @@ namespace NovaForge.Tiltwell.Unity
             settingsButton.onClick.AddListener(() => Navigation.ShowPopupAsync(ViewIds.Settings).Forget());
             if (dailyButton != null) dailyButton.onClick.AddListener(() => Navigation.ShowPopupAsync(ViewIds.DailyReward).Forget());
             if (puzzleButton != null) puzzleButton.onClick.AddListener(() => OpenPuzzle().Forget());
+            if (skinsButton != null) skinsButton.onClick.AddListener(() => Navigation.ShowPopupAsync(TiltwellViewIds.Skins).Forget());
         }
 
         private async Task OpenPuzzle()

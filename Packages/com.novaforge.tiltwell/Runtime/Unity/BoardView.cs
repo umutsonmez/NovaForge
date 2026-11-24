@@ -95,6 +95,8 @@ namespace NovaForge.Tiltwell.Unity
         [SerializeField] private float roundedRadiusPx = 48f;
         [SerializeField] private Sprite circle;
         [SerializeField] private Sprite softShadow;
+        [Tooltip("Star sprite for the Star drop skin.")]
+        [SerializeField] private Sprite star;
         [Tooltip("Icon font for arrow cells (Material Icons). Without it arrows show as a chevron of two bars.")]
         [SerializeField] private TMPro.TMP_FontAsset iconFont;
 
@@ -117,6 +119,8 @@ namespace NovaForge.Tiltwell.Unity
         private readonly Stack<Image> _particlePool = new Stack<Image>();
 
         public bool IsAnimating { get; private set; }
+        /// <summary>Droplet look; takes effect on the next Build/Sync.</summary>
+        public DropSkin Skin { get; set; }
         public float CellSize => _cell;
 
         private Sprite RoundedSprite => rounded != null ? rounded : TiltwellVisuals.Rounded;
@@ -294,22 +298,12 @@ namespace NovaForge.Tiltwell.Unity
             if (_fx != null) _fx.SetAsLastSibling();
         }
 
-        /// <summary>Drop = root (moves) with shadow, body (colored, returned) and shine.</summary>
+        /// <summary>Drop = root (moves) with the skin's parts; returns the body (the tinted part).</summary>
         private Image CreateDrop(int id, int pos, Color color)
         {
             var root = NewRect("Drop" + id, _layer);
             Place(root, pos, 0.74f);
-            var shadow = NewImage("Shadow", root, CircleSprite, new Color(0.1f, 0.12f, 0.3f, 0.22f));
-            Stretch(shadow.rectTransform);
-            shadow.rectTransform.anchoredPosition = new Vector2(0, -_cell * 0.06f);
-            var body = NewImage("Body", root, CircleSprite, color);
-            Stretch(body.rectTransform);
-            body.gameObject.AddComponent<UIGradient>().Set(new Color(1.0f, 1.0f, 1.0f), new Color(0.78f, 0.78f, 0.84f));
-            var shine = NewImage("Shine", root, CircleSprite, new Color(1f, 1f, 1f, 0.7f));
-            shine.rectTransform.sizeDelta = new Vector2(_cell * 0.2f, _cell * 0.15f);
-            shine.rectTransform.anchoredPosition = new Vector2(-_cell * 0.12f, _cell * 0.15f);
-            shine.rectTransform.localRotation = Quaternion.Euler(0, 0, 35f);
-            return body;
+            return DropVisual.Create(root, _cell * 0.74f, color, Skin, new DropSprites(circle, rounded, roundedRadiusPx, star));
         }
 
         private static RectTransform Root(Image body) => (RectTransform)body.transform.parent;

@@ -44,6 +44,10 @@ namespace NovaForge.Tiltwell.Unity
         private System.Threading.Tasks.Task<LevelData> _dailyTask;
         private int _dailyTaskDay;
         private NovaForge.Core.Data.SaveSlot<WorldChestState> _chestSlot;
+        private NovaForge.Core.Data.SaveSlot<SkinState> _skinSlot;
+
+        /// <summary>Owned and equipped droplet skins (loaded when Core is ready).</summary>
+        public SkinState Skins { get; private set; } = new SkinState();
 
         /// <summary>Opened world chests (loaded when Core is ready).</summary>
         public WorldChestState Chests { get; private set; } = new WorldChestState();
@@ -127,6 +131,8 @@ namespace NovaForge.Tiltwell.Unity
             GetDailyAsync(Today); // warm up: generate today's puzzle in the background
             _chestSlot = new NovaForge.Core.Data.SaveSlot<WorldChestState>(core.Saves, "tiltwell_chests", 1, () => new WorldChestState());
             Chests = _chestSlot.Load().Data;
+            _skinSlot = new NovaForge.Core.Data.SaveSlot<SkinState>(core.Saves, "tiltwell_skins", 1, () => new SkinState());
+            Skins = _skinSlot.Load().Data;
             IsReady = true;
             if (UIManager.Instance != null) UIManager.Instance.Navigation.ResetToAsync(ViewIds.MainMenu).Forget();
         }
@@ -157,6 +163,14 @@ namespace NovaForge.Tiltwell.Unity
             int coins = DailyPuzzle.Reward(Daily.Streak);
             var tx = new EconomyTransaction("daily_puzzle:" + day, "daily_puzzle").Credit("coin", coins);
             return Core.Economy.Apply(tx) == TransactionStatus.Success ? coins : 0;
+        }
+
+        /// <summary>Adds (if needed) and equips a skin, then saves. Call only after the skin was paid for.</summary>
+        public void SetSkin(DropSkin skin)
+        {
+            Skins.Add(skin);
+            Skins.Equip(skin);
+            _skinSlot?.Save(Skins);
         }
 
         public bool IsLevelCompleted(string id) => (Core.Progression.Get(id)?.BestStars ?? 0) > 0;

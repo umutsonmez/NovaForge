@@ -85,6 +85,7 @@ namespace NovaForge.Tiltwell.Editor
             UIMenu.CreateDailyRewardPopup();
             BuildColorGuide();
             BuildWorldChest();
+            BuildSkins();
 
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -150,6 +151,8 @@ namespace NovaForge.Tiltwell.Editor
             Currency(hints, TiltwellIds.Hint);
             var settings = UIMenu.IconButton(t, "Settings", UIIcons.Settings, UIButtonStyle.Secondary, 112);
             UIMenu.Place((RectTransform)settings.transform, new Vector2(1, 1), new Vector2(-36, -34), new Vector2(112, 112));
+            var skins = UIMenu.IconButton(t, "Skins", UIIcons.Drop, UIButtonStyle.Primary, 112);
+            UIMenu.Place((RectTransform)skins.transform, new Vector2(1, 1), new Vector2(-168, -34), new Vector2(112, 112));
 
             // Logo with gradient and a soft drop shadow.
             var logo = UIMenu.Text(t, "Title", "Tiltwell", 200, FontStyles.Bold, 260);
@@ -188,6 +191,7 @@ namespace NovaForge.Tiltwell.Editor
             so.FindProperty("settingsButton").objectReferenceValue = settings;
             so.FindProperty("dailyButton").objectReferenceValue = daily;
             so.FindProperty("puzzleButton").objectReferenceValue = puzzle;
+            so.FindProperty("skinsButton").objectReferenceValue = skins;
             so.FindProperty("puzzleBadge").objectReferenceValue = puzzleBadge;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -507,6 +511,7 @@ namespace NovaForge.Tiltwell.Editor
             bso.FindProperty("circle").objectReferenceValue = T.circle;
             bso.FindProperty("softShadow").objectReferenceValue = T.softShadow;
             bso.FindProperty("iconFont").objectReferenceValue = T.iconFont;
+            bso.FindProperty("star").objectReferenceValue = T.star;
             bso.ApplyModifiedPropertiesWithoutUndo();
 
             var arrow = UIMenu.Img(t, "HintArrow", T.circle, new Color(1, 1, 1, 0.55f));
@@ -668,6 +673,64 @@ namespace NovaForge.Tiltwell.Editor
             so.FindProperty("collectButton").objectReferenceValue = collect;
             so.FindProperty("confetti").objectReferenceValue = confettiGo.GetComponent<ConfettiBurst>();
             so.FindProperty("chestPop").objectReferenceValue = pop;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void BuildSkins()
+        {
+            var view = UIMenu.CreateView<SkinsView>("SkinsPopup", UIViewKind.Popup, TiltwellViewIds.Skins);
+            var panel = UIMenu.CreatePanel(view.transform, new Vector2(960, 1560));
+            var layout = UIMenu.VerticalPadded(panel, 40, 44, 40, 24);
+            UIMenu.Localized(UIMenu.Text(layout, "Title", "Drop Styles", 60, FontStyles.Bold, 90), TiltwellStrings.SkinsTitle);
+            var close = UIMenu.CornerClose(panel);
+
+            var grid = new GameObject("Grid", typeof(RectTransform), typeof(GridLayoutGroup), typeof(LayoutElement));
+            grid.transform.SetParent(layout, false);
+            grid.GetComponent<LayoutElement>().preferredHeight = 1340;
+            var g = grid.GetComponent<GridLayoutGroup>();
+            g.cellSize = new Vector2(420, 420);
+            g.spacing = new Vector2(24, 24);
+            g.childAlignment = TextAnchor.UpperCenter;
+            g.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            g.constraintCount = 2;
+
+            // Card template.
+            var cardGo = new GameObject("CardTemplate", typeof(RectTransform), typeof(SkinCard));
+            cardGo.transform.SetParent(grid.transform, false);
+            var frame = UIMenu.Img(cardGo.transform, "Frame", T.rounded, T.surface, 40);
+            UIMenu.Stretch(frame.gameObject, cardGo.transform);
+            var preview = new GameObject("Preview", typeof(RectTransform)).transform as RectTransform;
+            preview.SetParent(cardGo.transform, false);
+            preview.anchorMin = preview.anchorMax = new Vector2(0.5f, 1f);
+            preview.sizeDelta = new Vector2(360, 150);
+            preview.anchoredPosition = new Vector2(0, -110);
+            var name = UIMenu.Text(cardGo.transform, "Name", "Classic", 40, FontStyles.Bold, 60);
+            UIMenu.Place(name.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -210), new Vector2(380, 60));
+            name.rectTransform.pivot = new Vector2(0.5f, 1f);
+            name.rectTransform.anchoredPosition = new Vector2(0, -210);
+            var button = UIMenu.Button(cardGo.transform, "Button", null, out var buttonLabel, UIButtonStyle.Success, UIIcons.Coin, 104);
+            UIMenu.Place((RectTransform)button.transform, new Vector2(0.5f, 0f), new Vector2(0, 26), new Vector2(340, 104));
+            ((RectTransform)button.transform).pivot = new Vector2(0.5f, 0f);
+            ((RectTransform)button.transform).anchoredPosition = new Vector2(0, 26);
+            Transform coinIcon = null;
+            foreach (var tmp in button.GetComponentsInChildren<TMP_Text>(true))
+                if (tmp != buttonLabel) { coinIcon = tmp.transform; break; }
+
+            var cso = new SerializedObject(cardGo.GetComponent<SkinCard>());
+            cso.FindProperty("previewArea").objectReferenceValue = preview;
+            cso.FindProperty("nameLabel").objectReferenceValue = name;
+            cso.FindProperty("button").objectReferenceValue = button;
+            cso.FindProperty("buttonLabel").objectReferenceValue = buttonLabel;
+            cso.FindProperty("coinIcon").objectReferenceValue = coinIcon != null ? coinIcon.gameObject : null;
+            cso.FindProperty("frame").objectReferenceValue = frame;
+            cso.ApplyModifiedPropertiesWithoutUndo();
+
+            var so = new SerializedObject(view);
+            so.FindProperty("cardTemplate").objectReferenceValue = cardGo.GetComponent<SkinCard>();
+            so.FindProperty("closeButton").objectReferenceValue = close;
+            so.FindProperty("circle").objectReferenceValue = T.circle;
+            so.FindProperty("rounded").objectReferenceValue = T.rounded;
+            so.FindProperty("star").objectReferenceValue = T.star;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
