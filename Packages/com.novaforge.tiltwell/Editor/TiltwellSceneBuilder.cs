@@ -21,6 +21,8 @@ namespace NovaForge.Tiltwell.Editor
     {
         public const string ScenePath = "Assets/Tiltwell/Tiltwell.unity";
         public const string LevelsPath = "Packages/com.novaforge.tiltwell/Runtime/Levels/levels.json";
+        public const string PrivacyPolicyUrl = "https://umutsonmez.github.io/NovaForge/tiltwell/privacy.html";
+        public const string SupportEmail = "tiltwell.support@gmail.com";
 
         [MenuItem("NOVAFORGE/Tiltwell/Build Game Scene", priority = 0)]
         public static void BuildScene()
@@ -40,6 +42,8 @@ namespace NovaForge.Tiltwell.Editor
             var appSo = new SerializedObject(app);
             appSo.FindProperty("levelPack").objectReferenceValue = AssetDatabase.LoadAssetAtPath<TextAsset>(LevelsPath)
                 ?? throw new FileNotFoundException(LevelsPath);
+            appSo.FindProperty("privacyPolicyUrl").stringValue = PrivacyPolicyUrl;
+            appSo.FindProperty("supportEmail").stringValue = SupportEmail;
             appSo.ApplyModifiedPropertiesWithoutUndo();
             appGo.AddComponent<AudioService>();
             appGo.SetActive(true);
