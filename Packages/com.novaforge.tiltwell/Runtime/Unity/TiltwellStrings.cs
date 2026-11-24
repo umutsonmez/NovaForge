@@ -27,6 +27,9 @@ namespace NovaForge.Tiltwell.Unity
         public const string ColorGuideTitle = "tiltwell.color_guide_title";
         public const string ColorGuideText = "tiltwell.color_guide_text";
         public const string GotIt = "tiltwell.got_it";
+        public const string TutorialSticky = "tiltwell.tutorial_sticky";
+        public const string TutorialArrow = "tiltwell.tutorial_arrow";
+        public const string TutorialPaint = "tiltwell.tutorial_paint";
 
         private static readonly string[] Keys =
         {
@@ -34,6 +37,7 @@ namespace NovaForge.Tiltwell.Unity
             ExtraMovesOffer, Tutorial, TutorialMix, AllDone,
             "resource.coin", "resource.hint", "shop.hints_3", "shop.hints_10",
             WorldN, TutorialBrown, ColorGuideTitle, ColorGuideText, GotIt,
+            TutorialSticky, TutorialArrow, TutorialPaint,
         };
 
         private static readonly Dictionary<string, string[]> Values = new Dictionary<string, string[]>
@@ -50,6 +54,9 @@ namespace NovaForge.Tiltwell.Unity
                 "World {0}",
                 "Brown wells need all three colors: red, yellow and blue.",
                 "Mixing colors", "When two drops bump into each other, they mix:", "Got it!",
+                "Honey tiles are sticky: a drop stops as soon as it slides onto one.",
+                "Arrow tiles are one-way: drops can only cross them in the arrow's direction.",
+                "A drop that slides over a paint tile picks up its color.",
             },
             [Languages.Turkish] = new[]
             {
@@ -63,6 +70,9 @@ namespace NovaForge.Tiltwell.Unity
                 "Dünya {0}",
                 "Kahverengi kuyu üç rengin hepsini ister: kırmızı, sarı ve mavi.",
                 "Renkleri karıştır", "İki damla çarpışınca renkleri karışır:", "Anladım!",
+                "Bal rengi kareler yapışkan: üstüne kayan damla orada durur.",
+                "Oklu karelerden sadece ok yönünde geçilebilir.",
+                "Boya karosunun üstünden geçen damla o rengi alır.",
             },
             [Languages.German] = new[]
             {
@@ -76,6 +86,9 @@ namespace NovaForge.Tiltwell.Unity
                 "Welt {0}",
                 "Braune Brunnen brauchen alle drei Farben: Rot, Gelb und Blau.",
                 "Farben mischen", "Wenn zwei Tropfen zusammenstoßen, mischen sie sich:", "Verstanden!",
+                "Honigfelder sind klebrig: Ein Tropfen bleibt darauf sofort stehen.",
+                "Pfeilfelder sind Einbahnstraßen: Tropfen kommen nur in Pfeilrichtung durch.",
+                "Ein Tropfen, der über ein Farbfeld rutscht, nimmt dessen Farbe an.",
             },
             [Languages.French] = new[]
             {
@@ -89,6 +102,9 @@ namespace NovaForge.Tiltwell.Unity
                 "Monde {0}",
                 "Les puits bruns demandent les trois couleurs : rouge, jaune et bleu.",
                 "Mélanger les couleurs", "Quand deux gouttes se touchent, elles se mélangent :", "Compris !",
+                "Les cases de miel collent : une goutte s'y arrête aussitôt.",
+                "Les cases fléchées sont à sens unique : on ne les traverse que dans le sens de la flèche.",
+                "Une goutte qui glisse sur une case de peinture prend sa couleur.",
             },
             [Languages.Spanish] = new[]
             {
@@ -102,6 +118,9 @@ namespace NovaForge.Tiltwell.Unity
                 "Mundo {0}",
                 "Los pozos marrones necesitan los tres colores: rojo, amarillo y azul.",
                 "Mezclar colores", "Cuando dos gotas chocan, se mezclan:", "¡Entendido!",
+                "Las casillas de miel son pegajosas: una gota se detiene en cuanto entra.",
+                "Las casillas con flecha son de un solo sentido: solo se cruzan en la dirección de la flecha.",
+                "Una gota que pasa sobre una casilla de pintura toma su color.",
             },
             [Languages.Portuguese] = new[]
             {
@@ -115,6 +134,9 @@ namespace NovaForge.Tiltwell.Unity
                 "Mundo {0}",
                 "Poços marrons precisam das três cores: vermelho, amarelo e azul.",
                 "Misturar cores", "Quando duas gotas se encontram, elas se misturam:", "Entendi!",
+                "As casas de mel são grudentas: a gota para assim que entra nelas.",
+                "As casas com seta são de mão única: só dá para passar na direção da seta.",
+                "Uma gota que passa sobre uma casa de tinta pega a cor dela.",
             },
             [Languages.Japanese] = new[]
             {
@@ -128,6 +150,9 @@ namespace NovaForge.Tiltwell.Unity
                 "ワールド {0}",
                 "茶色の井戸には赤・黄・青の3色すべてが必要です。",
                 "色を混ぜよう", "しずくがぶつかると色が混ざります：", "わかった！",
+                "はちみつのマスはベタベタ。しずくは乗った瞬間に止まります。",
+                "矢印のマスは一方通行。矢印の向きにしか通れません。",
+                "ペンキのマスを通ったしずくはその色に染まります。",
             },
             [Languages.Korean] = new[]
             {
@@ -141,6 +166,9 @@ namespace NovaForge.Tiltwell.Unity
                 "월드 {0}",
                 "갈색 우물에는 빨강, 노랑, 파랑 세 가지 색이 모두 필요합니다.",
                 "색 섞기", "물방울이 부딪히면 색이 섞입니다:", "알겠어요!",
+                "꿀 칸은 끈적해요. 물방울이 올라가면 바로 멈춥니다.",
+                "화살표 칸은 일방통행이에요. 화살표 방향으로만 지나갈 수 있어요.",
+                "물감 칸을 지나간 물방울은 그 색을 띱니다.",
             },
         };
 

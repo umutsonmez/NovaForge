@@ -11,6 +11,13 @@ Amaç: platformun her modülünü (ekonomi, ilerleme, günlük ödül, mağaza, 
 - Yıldız: hamle ≤ par → 3, ≤ par+3 → 2, aksi 1. Hamle limiti = par×2+4 (ödüllü reklamla +5).
 - Geri al, yeniden başlat, ipucu (ipucu eşyası harcar; yoksa ödüllü reklam).
 
+## Özel zeminler (Dünya 6+)
+- `~` **yapışkan** (bal rengi): üstüne giren damla orada durur, sonraki eğişte çıkabilir.
+- `^ v < >` **tek yön oku**: sadece ok yönünde girilebilir, diğer yönlerden duvar gibi davranır.
+- `1 2 3` **boya karosu** (elmas): üstünden geçen damlaya kırmızı/sarı/mavi ekler.
+- Dağılım: Dünya 6 yapışkan, 7 kahverengi kuyu, 8 ok, 9 boya, 10 hepsi. Her mekaniğin ilk bölümünde kısa açıklama mesajı çıkar.
+- Solver bunları bilir. `CanStillSolve`, boya karolarının ekleyebileceği renkleri de hesaba katar.
+
 ## Yapı
 | Katman | Asmdef | Not |
 |---|---|---|
@@ -35,7 +42,7 @@ Sahne elle yapılmaz; builder koddan üretir (`Assets/Tiltwell/Tiltwell.unity`) 
 - Sonuç, günlük ödül, mağaza, ayarlar Core'un temalı ekranları (konfeti, sırayla yıldız).
 
 ## Bölümler
-`Runtime/Levels/levels.json`: 92 bölüm, 10 kademe (dünya), seed `20261123`. Kademe 6+ sonradan eklendi; ilk 36 bölüm aynı kalır (kayıtlı ilerleme bozulmaz). Kademe 7'den itibaren kahverengi kuyular var (üç ana rengin hepsi gerekir). Her bölüm BFS solver ile çözülebilirliği ve par değeri doğrulanmış olarak üretilir:
+`Runtime/Levels/levels.json`: 92 bölüm, 10 kademe (dünya), seed `20261123`. Kademe 6+ sonradan eklendi; ilk 36 bölüm aynı kalır (kayıtlı ilerleme bozulmaz). Kademe 7'den itibaren kahverengi kuyular var (üç ana rengin hepsi gerekir). Kademe 6, 8, 9 ve 10 özel zeminler kullanır. Her bölüm BFS solver ile çözülebilirliği ve par değeri doğrulanmış olarak üretilir:
 ```
 cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packages/com.novaforge.tiltwell/Runtime/Levels/levels.json
 ```
@@ -52,7 +59,7 @@ cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packag
 Release build için `privacyPolicyUrl` (https) zorunlu; yoksa Core doğrulaması başlatmayı durdurur.
 
 ## Testler
-- dotnet: 24 kural/solver/oturum/renk tarifi testi.
+- dotnet: 28 test (kural, solver, oturum, renk tarifi, özel zemin).
 - Unity PlayMode `TiltwellPlayTests`: gerçek sahne; günlük ödül popup'ı → Play → bölüm 1'i solver hamleleriyle çöz → 3 yıldız + coin → Next ile bölüm 2. Ayrıca geri al ve ipucu harcama.
 
 ## Eksikler (dürüst liste)

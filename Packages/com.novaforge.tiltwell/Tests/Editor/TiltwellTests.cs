@@ -345,4 +345,52 @@ namespace NovaForge.Tiltwell.Tests
             CollectionAssert.AreEqual(new[] { Paint.Orange, Paint.Green, Paint.Brown }, ColorRecipes.MixedWells(level));
         }
     }
+
+    public class SpecialFloorTests
+    {
+        private static Board B(out PuzzleState s, params string[] rows)
+        {
+            var (b, st) = Board.Parse(rows);
+            s = st;
+            return b;
+        }
+
+        [Test]
+        public void Sticky_StopsDroplet_ThenItCanLeave()
+        {
+            var b = B(out var s, "#######", "#R.~.r#", "#######");
+            var r = Rules.Apply(b, s, Tilt.Right);
+            Assert.AreEqual(b.Pos(3, 1), r.State.Droplets[0].Pos);
+            r = Rules.Apply(b, r.State, Tilt.Right);
+            Assert.IsTrue(r.State.IsSolved);
+        }
+
+        [Test]
+        public void Arrow_PassesInItsDirection_BlocksOtherwise()
+        {
+            var b = B(out var s, "######", "#R>.r#", "######");
+            Assert.IsTrue(Rules.Apply(b, s, Tilt.Right).State.IsSolved);
+            b = B(out s, "######", "#R<.r#", "######");
+            Assert.IsFalse(Rules.Apply(b, s, Tilt.Right).Changed);
+        }
+
+        [Test]
+        public void PaintPad_AddsItsColor()
+        {
+            var b = B(out var s, "######", "#R2.o#", "######");
+            Assert.AreEqual(Paint.Yellow, b.PadColors);
+            Assert.IsTrue(Rules.CanStillSolve(b, s), "pad can supply the missing yellow");
+            var r = Rules.Apply(b, s, Tilt.Right);
+            Assert.IsTrue(r.State.IsSolved);
+            Assert.AreEqual(Paint.Orange, r.Steps[0].Color);
+        }
+
+        [Test]
+        public void Solver_UsesPads()
+        {
+            var b = B(out var s, "######", "#R3..#", "#...p#", "######");
+            var sol = Solver.Solve(b, s);
+            CollectionAssert.AreEqual(new[] { Tilt.Right, Tilt.Down }, sol.Moves);
+        }
+    }
 }

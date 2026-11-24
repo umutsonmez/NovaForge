@@ -46,6 +46,8 @@ namespace NovaForge.Tiltwell
         /// <summary>Droplets that are not needed for any well (they get in the way).</summary>
         public int MaxDistractors;
         public int MaxHoles;
+        /// <summary>Special floors (1..Max each when Max &gt; 0). Zero keeps the random sequence of older tiers unchanged.</summary>
+        public int MaxSticky, MaxArrows, MaxPads;
         public float WallDensity;
         public int MinPar, MaxPar;
     }
@@ -67,11 +69,11 @@ namespace NovaForge.Tiltwell
             new TierSpec { Tier = 4, Count = 8, MinSize = 7, MaxSize = 7, MinWells = 2, MaxWells = 3, MinMixedWells = 1, MaxMixedWells = 2, MaxDistractors = 1, MaxHoles = 2, WallDensity = 0.15f, MinPar = 6, MaxPar = 9 },
             new TierSpec { Tier = 5, Count = 8, MinSize = 7, MaxSize = 8, MinWells = 3, MaxWells = 3, MinMixedWells = 2, MaxMixedWells = 3, MaxDistractors = 1, MaxHoles = 2, WallDensity = 0.16f, MinPar = 8, MaxPar = 12 },
             // Tiers 6+ were appended later. Earlier tiers must stay untouched so shipped level ids keep their layouts.
-            new TierSpec { Tier = 6, Count = 10, MinSize = 7, MaxSize = 8, MinWells = 3, MaxWells = 3, MinMixedWells = 2, MaxMixedWells = 3, MaxDistractors = 2, MaxHoles = 3, WallDensity = 0.16f, MinPar = 9, MaxPar = 12 },
+            new TierSpec { Tier = 6, Count = 10, MinSize = 7, MaxSize = 8, MinWells = 2, MaxWells = 3, MinMixedWells = 1, MaxMixedWells = 2, MaxDistractors = 1, MaxHoles = 2, MaxSticky = 3, WallDensity = 0.14f, MinPar = 9, MaxPar = 12 },
             new TierSpec { Tier = 7, Count = 10, MinSize = 6, MaxSize = 7, MinWells = 1, MaxWells = 2, MinBrownWells = 1, MaxBrownWells = 1, MinMixedWells = 0, MaxMixedWells = 1, MaxDistractors = 1, MaxHoles = 2, WallDensity = 0.14f, MinPar = 10, MaxPar = 13 },
-            new TierSpec { Tier = 8, Count = 12, MinSize = 7, MaxSize = 8, MinWells = 2, MaxWells = 3, MinBrownWells = 1, MaxBrownWells = 1, MinMixedWells = 1, MaxMixedWells = 2, MaxDistractors = 1, MaxHoles = 2, WallDensity = 0.15f, MinPar = 11, MaxPar = 14 },
-            new TierSpec { Tier = 9, Count = 12, MinSize = 8, MaxSize = 8, MinWells = 3, MaxWells = 3, MinBrownWells = 0, MaxBrownWells = 1, MinMixedWells = 2, MaxMixedWells = 3, MaxDistractors = 2, MaxHoles = 3, WallDensity = 0.16f, MinPar = 12, MaxPar = 15 },
-            new TierSpec { Tier = 10, Count = 12, MinSize = 8, MaxSize = 9, MinWells = 3, MaxWells = 4, MinBrownWells = 1, MaxBrownWells = 1, MinMixedWells = 1, MaxMixedWells = 3, MaxDistractors = 2, MaxHoles = 3, WallDensity = 0.17f, MinPar = 13, MaxPar = 16 },
+            new TierSpec { Tier = 8, Count = 12, MinSize = 7, MaxSize = 8, MinWells = 2, MaxWells = 3, MinMixedWells = 1, MaxMixedWells = 2, MaxDistractors = 1, MaxHoles = 2, MaxArrows = 3, WallDensity = 0.13f, MinPar = 11, MaxPar = 14 },
+            new TierSpec { Tier = 9, Count = 12, MinSize = 7, MaxSize = 8, MinWells = 2, MaxWells = 3, MinMixedWells = 1, MaxMixedWells = 3, MaxDistractors = 1, MaxHoles = 2, MaxPads = 2, WallDensity = 0.14f, MinPar = 12, MaxPar = 15 },
+            new TierSpec { Tier = 10, Count = 12, MinSize = 8, MaxSize = 8, MinWells = 3, MaxWells = 3, MinBrownWells = 0, MaxBrownWells = 1, MinMixedWells = 1, MaxMixedWells = 2, MaxDistractors = 1, MaxHoles = 2, MaxSticky = 2, MaxArrows = 2, MaxPads = 1, WallDensity = 0.14f, MinPar = 13, MaxPar = 16 },
         };
 
         public static LevelPack Generate(int seed, IReadOnlyList<TierSpec> tiers = null, int maxAttemptsPerLevel = 20_000)
@@ -187,6 +189,16 @@ namespace NovaForge.Tiltwell
 
             int distractors = t.MaxDistractors > 0 ? rng.Next(0, t.MaxDistractors + 1) : 0;
             for (int i = 0; i < distractors; i++) dropColors.Add(Primaries[rng.Next(Primaries.Length)]);
+
+            // Paint pads usually replace one droplet of their color, so the pad is part of the solution.
+            var pads = new List<Paint>();
+            int padCount = t.MaxPads > 0 ? rng.Next(1, t.MaxPads + 1) : 0;
+            for (int i = 0; i < padCount; i++)
+            {
+                var c = Primaries[rng.Next(Primaries.Length)];
+                pads.Add(c);
+                if (dropColors.Count > 1 && dropColors.Contains(c) && rng.NextDouble() < 0.7) dropColors.Remove(c);
+            }
             if (free.Count < dropColors.Count) return null;
             foreach (var c in dropColors)
             {
@@ -199,6 +211,27 @@ namespace NovaForge.Tiltwell
             {
                 var (x, y) = Take();
                 g[y][x] = 'x';
+            }
+
+            foreach (var c in pads)
+            {
+                if (free.Count == 0) return null;
+                var (x, y) = Take();
+                g[y][x] = c == Paint.Red ? '1' : c == Paint.Yellow ? '2' : '3';
+            }
+            int sticky = t.MaxSticky > 0 ? rng.Next(1, t.MaxSticky + 1) : 0;
+            for (int i = 0; i < sticky; i++)
+            {
+                if (free.Count == 0) return null;
+                var (x, y) = Take();
+                g[y][x] = '~';
+            }
+            int arrows = t.MaxArrows > 0 ? rng.Next(1, t.MaxArrows + 1) : 0;
+            for (int i = 0; i < arrows; i++)
+            {
+                if (free.Count == 0) return null;
+                var (x, y) = Take();
+                g[y][x] = "^v<>"[rng.Next(4)];
             }
 
             var rows = new string[h];

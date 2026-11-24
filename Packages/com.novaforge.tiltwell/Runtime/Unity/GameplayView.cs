@@ -102,6 +102,7 @@ namespace NovaForge.Tiltwell.Unity
             _session = new PuzzleSession(level);
             _finished = false;
             _queued = null;
+            HideHintArrow(); // an arrow from the previous level must not carry over
             Canvas.ForceUpdateCanvases(); // board rect must have its final size before building
             board.Build(_session.Board, _session.State);
             int index = Core.Progression.Catalog.IndexOf(levelId);
@@ -109,6 +110,9 @@ namespace NovaForge.Tiltwell.Unity
             ShowMessage(index == 0 ? TiltwellStrings.Tutorial
                 : level.Tier == 2 && IsFirstOfTier(app, level) ? TiltwellStrings.TutorialMix
                 : IsFirstBrownLevel(app, level) ? TiltwellStrings.TutorialBrown
+                : IsFirstWith(app, level, "~") ? TiltwellStrings.TutorialSticky
+                : IsFirstWith(app, level, "^v<>") ? TiltwellStrings.TutorialArrow
+                : IsFirstWith(app, level, "123") ? TiltwellStrings.TutorialPaint
                 : null);
             _balanceSub = Core.Events.Subscribe<BalanceChanged>(_ => RefreshHud());
             RefreshHud();
@@ -197,6 +201,17 @@ namespace NovaForge.Tiltwell.Unity
             foreach (var row in level.Rows) if (row.IndexOf('k') >= 0) return true;
             return false;
         }
+
+        private static bool Contains(LevelData level, string chars)
+        {
+            foreach (var row in level.Rows)
+                if (row.IndexOfAny(chars.ToCharArray()) >= 0) return true;
+            return false;
+        }
+
+        /// <summary>True on the first level (in play order) that uses any of the given special floor characters.</summary>
+        private static bool IsFirstWith(TiltwellApp app, LevelData level, string chars) =>
+            Contains(level, chars) && app.Levels.Find(l => Contains(l, chars)) == level;
 
         private static bool IsFirstBrownLevel(TiltwellApp app, LevelData level) =>
             HasBrownWell(level) && app.Levels.Find(HasBrownWell) == level;

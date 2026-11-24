@@ -31,6 +31,10 @@ namespace NovaForge.Tiltwell.Unity
         public static readonly Color WallBottom = new Color32(0x76, 0x82, 0xAB, 0xFF);
         public static readonly Color WallEdge = new Color32(0x58, 0x63, 0x8C, 0xFF);
         public static readonly Color Hole = new Color32(0x26, 0x2B, 0x47, 0xFF);
+        public static readonly Color Sticky = new Color32(0xF7, 0xD9, 0x8E, 0xFF);
+        public static readonly Color StickyDots = new Color32(0xE3, 0xA9, 0x3A, 0xFF);
+        public static readonly Color ArrowFloor = new Color32(0xC9, 0xDB, 0xFF, 0xFF);
+        public static readonly Color ArrowGlyph = new Color32(0x24, 0x56, 0xD6, 0xFF);
 
         private static Sprite _circle, _ring, _rounded;
         public static Sprite Circle => _circle != null ? _circle : _circle = Make(128, (d, r) => d <= r - 1 ? 1f : Mathf.Clamp01(r - d));
@@ -91,6 +95,8 @@ namespace NovaForge.Tiltwell.Unity
         [SerializeField] private float roundedRadiusPx = 48f;
         [SerializeField] private Sprite circle;
         [SerializeField] private Sprite softShadow;
+        [Tooltip("Icon font for arrow cells (Material Icons). Without it arrows show as a chevron of two bars.")]
+        [SerializeField] private TMPro.TMP_FontAsset iconFont;
 
         private readonly Dictionary<int, Image> _drops = new Dictionary<int, Image>();
         private readonly List<Image> _wellFills = new List<Image>();
@@ -174,6 +180,7 @@ namespace NovaForge.Tiltwell.Unity
                     var tile = NewImage("Cell", _layer, RoundedSprite, (x + y) % 2 == 0 ? TiltwellVisuals.Floor : TiltwellVisuals.FloorAlt);
                     Slice(tile, _cell * 0.2f);
                     Place(tile.rectTransform, pos, 0.94f);
+                    DrawSpecialFloor(cell, pos, tile);
                     if (cell == Cell.Hole)
                     {
                         var hole = NewImage("Hole", _layer, CircleSprite, TiltwellVisuals.Hole);
@@ -208,6 +215,73 @@ namespace NovaForge.Tiltwell.Unity
             _fx = NewRect("Effects", root);
             _fx.sizeDelta = grid;
             Sync(state);
+        }
+
+        private void DrawSpecialFloor(Cell cell, int pos, Image tile)
+        {
+            if (cell == Cell.Sticky)
+            {
+                tile.color = TiltwellVisuals.Sticky;
+                // A few honey dots so it reads as "sticky" without words.
+                var dots = new[] { new Vector2(-0.2f, 0.18f), new Vector2(0.2f, 0.1f), new Vector2(-0.05f, -0.2f), new Vector2(0.22f, -0.22f) };
+                float[] sizes = { 0.16f, 0.12f, 0.14f, 0.09f };
+                for (int i = 0; i < dots.Length; i++)
+                {
+                    var dot = NewImage("Dot", _layer, CircleSprite, TiltwellVisuals.StickyDots);
+                    Place(dot.rectTransform, pos, sizes[i]);
+                    dot.rectTransform.anchoredPosition += dots[i] * _cell;
+                }
+                return;
+            }
+            var arrow = Board.ArrowDirection(cell);
+            if (arrow.HasValue)
+            {
+                tile.color = TiltwellVisuals.ArrowFloor;
+                float angle = arrow.Value switch { Tilt.Up => 0f, Tilt.Left => 90f, Tilt.Down => 180f, _ => 270f };
+                if (iconFont != null)
+                {
+                    var go = new GameObject("Arrow", typeof(RectTransform), typeof(CanvasRenderer), typeof(TMPro.TextMeshProUGUI));
+                    go.transform.SetParent(_layer, false);
+                    var t = go.GetComponent<TMPro.TextMeshProUGUI>();
+                    t.font = iconFont;
+                    t.text = UIIcons.ArrowUp;
+                    t.fontSize = _cell * 0.78f;
+                    t.fontStyle = TMPro.FontStyles.Bold;
+                    t.color = TiltwellVisuals.ArrowGlyph;
+                    t.alignment = TMPro.TextAlignmentOptions.Center;
+                    t.raycastTarget = false;
+                    Place(t.rectTransform, pos, 0.9f);
+                    t.rectTransform.localRotation = Quaternion.Euler(0, 0, angle);
+                }
+                else
+                {
+                    for (int side = -1; side <= 1; side += 2)
+                    {
+                        var bar = NewImage("Chevron", _layer, RoundedSprite, TiltwellVisuals.ArrowGlyph);
+                        Place(bar.rectTransform, pos, 0.1f);
+                        bar.rectTransform.sizeDelta = new Vector2(_cell * 0.1f, _cell * 0.36f);
+                        var offset = Quaternion.Euler(0, 0, angle) * new Vector3(side * _cell * 0.1f, 0, 0);
+                        bar.rectTransform.anchoredPosition += (Vector2)offset;
+                        bar.rectTransform.localRotation = Quaternion.Euler(0, 0, angle - side * 40f);
+                    }
+                }
+                return;
+            }
+            var pad = Board.PadColor(cell);
+            if (pad != Paint.None)
+            {
+                // Diamond of paint, clearly different from round wells.
+                var color = TiltwellVisuals.Of(pad);
+                var under = NewImage("PadShade", _layer, RoundedSprite, Fade(color, 0.25f));
+                Slice(under, _cell * 0.12f);
+                Place(under.rectTransform, pos, 0.6f);
+                under.rectTransform.localRotation = Quaternion.Euler(0, 0, 45f);
+                var diamond = NewImage("Pad", _layer, RoundedSprite, color);
+                Slice(diamond, _cell * 0.1f);
+                Place(diamond.rectTransform, pos, 0.42f);
+                diamond.rectTransform.localRotation = Quaternion.Euler(0, 0, 45f);
+                diamond.gameObject.AddComponent<UIGradient>().Set(Color.white, new Color(0.82f, 0.82f, 0.88f));
+            }
         }
 
         /// <summary>Snaps the view to a state (after undo/restart).</summary>
@@ -287,6 +361,15 @@ namespace NovaForge.Tiltwell.Unity
                     if (!_drops.TryGetValue(s.Id, out var img)) continue;
                     switch (s.Fate)
                     {
+                        case DropletFate.Moved:
+                            var painted = TiltwellVisuals.Of(s.Color);
+                            if (img.color != painted)
+                            {
+                                img.color = painted;
+                                pulsing.Add(Root(img));
+                                Burst(Root(img).anchoredPosition, painted, 10);
+                            }
+                            break;
                         case DropletFate.Merged:
                             Destroy(Root(img).gameObject);
                             _drops.Remove(s.Id);

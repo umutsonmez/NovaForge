@@ -23,12 +23,18 @@ namespace NovaForge.Tiltwell
 
     public enum Tilt { Up, Down, Left, Right }
 
-    public enum Cell : byte { Floor, Wall, Hole }
+    /// <summary>
+    /// Static cell types. Sticky stops a sliding droplet on it. An arrow can only be entered while moving in its
+    /// direction (otherwise it acts as a wall). A paint pad adds its primary to every droplet that enters it.
+    /// New values go at the end so existing data keeps its meaning.
+    /// </summary>
+    public enum Cell : byte { Floor, Wall, Hole, Sticky, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, PaintRed, PaintYellow, PaintBlue }
 
     /// <summary>
     /// Static part of a level: walls, holes and wells (targets). Parsed from a text grid:
     /// '#' wall, '.' floor, 'x' hole; UPPERCASE = droplet of that color, lowercase = well that accepts that color.
     /// Color letters: R red, Y yellow, B blue, O orange, P purple, G green, K brown.
+    /// Special floors: '~' sticky, '^' 'v' '&lt;' '&gt;' one-way arrows, '1' '2' '3' red/yellow/blue paint pads.
     /// </summary>
     public sealed class Board
     {
@@ -38,11 +44,27 @@ namespace NovaForge.Tiltwell
         /// <summary>Well cells in index order; a state's well mask refers to these indexes.</summary>
         public IReadOnlyList<int> Wells { get; }
         public IReadOnlyList<Paint> WellColors { get; }
+        /// <summary>Union of all paint pad colors on the board (None when there are no pads).</summary>
+        public Paint PadColors { get; }
 
         private Board(int w, int h, Cell[] cells, List<int> wells, List<Paint> wellColors)
         {
             Width = w; Height = h; _cells = cells; Wells = wells; WellColors = wellColors;
+            foreach (var c in cells) PadColors |= PadColor(c);
         }
+
+        /// <summary>Direction an arrow cell lets droplets through, or null for other cells.</summary>
+        public static Tilt? ArrowDirection(Cell c) => c switch
+        {
+            Cell.ArrowUp => Tilt.Up, Cell.ArrowDown => Tilt.Down, Cell.ArrowLeft => Tilt.Left, Cell.ArrowRight => Tilt.Right,
+            _ => (Tilt?)null,
+        };
+
+        /// <summary>Primary a paint pad adds, or None.</summary>
+        public static Paint PadColor(Cell c) => c switch
+        {
+            Cell.PaintRed => Paint.Red, Cell.PaintYellow => Paint.Yellow, Cell.PaintBlue => Paint.Blue, _ => Paint.None,
+        };
 
         public Cell this[int pos] => _cells[pos];
         public Cell At(int x, int y) => _cells[y * Width + x];
@@ -92,6 +114,14 @@ namespace NovaForge.Tiltwell
                         case '#': cells[pos] = Cell.Wall; break;
                         case '.': cells[pos] = Cell.Floor; break;
                         case 'x': cells[pos] = Cell.Hole; break;
+                        case '~': cells[pos] = Cell.Sticky; break;
+                        case '^': cells[pos] = Cell.ArrowUp; break;
+                        case 'v': cells[pos] = Cell.ArrowDown; break;
+                        case '<': cells[pos] = Cell.ArrowLeft; break;
+                        case '>': cells[pos] = Cell.ArrowRight; break;
+                        case '1': cells[pos] = Cell.PaintRed; break;
+                        case '2': cells[pos] = Cell.PaintYellow; break;
+                        case '3': cells[pos] = Cell.PaintBlue; break;
                         default:
                             var paint = FromLetter(c);
                             if (paint == Paint.None) throw new FormatException($"Unknown char '{c}' at {x},{y}.");
@@ -191,6 +221,8 @@ namespace NovaForge.Tiltwell
     /// <summary>
     /// The rules. A tilt slides every droplet in the direction until it meets a wall. Droplets nearest the wall move
     /// first; a droplet sliding into a resting droplet merges into it (colors mix). A droplet sliding into a hole is lost.
+    /// Special floors: entering a sticky cell stops the droplet there; an arrow cell blocks droplets that do not move in
+    /// its direction; entering a paint pad mixes the pad's primary into the droplet.
     /// After all droplets rest, each droplet resting on an open well of exactly its color fills that well and disappears.
     /// The level is solved when every well is filled.
     /// </summary>
@@ -221,6 +253,7 @@ namespace NovaForge.Tiltwell
             {
                 int x = board.X(d.Pos), y = board.Y(d.Pos);
                 int pos = d.Pos;
+                var color = d.Color;
                 bool done = false;
                 while (true)
                 {
@@ -228,10 +261,12 @@ namespace NovaForge.Tiltwell
                     int next = board.Pos(nx, ny);
                     var cell = board[next];
                     if (cell == Cell.Wall) break;
+                    var arrow = Board.ArrowDirection(cell);
+                    if (arrow.HasValue && arrow.Value != tilt) break;
                     if (resting.TryGetValue(next, out int hostIdx))
                     {
                         var host = settled[hostIdx];
-                        var mixed = host.Color | d.Color;
+                        var mixed = host.Color | color;
                         settled[hostIdx] = new Droplet(host.Id, host.Pos, mixed);
                         result.Steps.Add(new DropletStep(d.Id, d.Pos, next, DropletFate.Merged, host.Id, mixed));
                         result.Changed = true;
@@ -241,20 +276,22 @@ namespace NovaForge.Tiltwell
                     x = nx; y = ny; pos = next;
                     if (cell == Cell.Hole)
                     {
-                        result.Steps.Add(new DropletStep(d.Id, d.Pos, pos, DropletFate.FellInHole, -1, d.Color));
+                        result.Steps.Add(new DropletStep(d.Id, d.Pos, pos, DropletFate.FellInHole, -1, color));
                         result.Changed = true;
                         done = true;
                         break;
                     }
+                    color |= Board.PadColor(cell);
+                    if (cell == Cell.Sticky) break;
                 }
                 if (done) continue;
                 if (pos != d.Pos)
                 {
                     result.Changed = true;
-                    result.Steps.Add(new DropletStep(d.Id, d.Pos, pos, DropletFate.Moved, -1, d.Color));
+                    result.Steps.Add(new DropletStep(d.Id, d.Pos, pos, DropletFate.Moved, -1, color));
                 }
                 resting[pos] = settled.Count;
-                settled.Add(new Droplet(d.Id, pos, d.Color));
+                settled.Add(new Droplet(d.Id, pos, color));
             }
 
             // Deliveries happen only after everything rests.
@@ -278,7 +315,8 @@ namespace NovaForge.Tiltwell
 
         /// <summary>
         /// Cheap necessary condition for solvability: every open well's color must be buildable from droplets whose
-        /// colors are subsets of it (mixing only adds primaries). False = certainly stuck (restart / undo).
+        /// colors are subsets of it (mixing only adds primaries), plus what paint pads can add.
+        /// False = certainly stuck (restart / undo).
         /// </summary>
         public static bool CanStillSolve(Board board, PuzzleState state)
         {
@@ -287,8 +325,10 @@ namespace NovaForge.Tiltwell
                 if (!state.IsWellOpen(w)) continue;
                 var need = board.WellColors[w];
                 Paint have = Paint.None;
-                foreach (var d in state.Droplets) if ((d.Color & ~need) == 0) have |= d.Color;
-                if (have != need) return false;
+                bool any = false;
+                foreach (var d in state.Droplets)
+                    if ((d.Color & ~need) == 0) { have |= d.Color; any = true; }
+                if (!any || (have | (board.PadColors & need)) != need) return false;
             }
             return true;
         }

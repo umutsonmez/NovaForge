@@ -482,6 +482,7 @@ namespace NovaForge.Tiltwell.Editor
             bso.FindProperty("rounded").objectReferenceValue = T.rounded;
             bso.FindProperty("circle").objectReferenceValue = T.circle;
             bso.FindProperty("softShadow").objectReferenceValue = T.softShadow;
+            bso.FindProperty("iconFont").objectReferenceValue = T.iconFont;
             bso.ApplyModifiedPropertiesWithoutUndo();
 
             var arrow = UIMenu.Img(t, "HintArrow", T.circle, new Color(1, 1, 1, 0.55f));

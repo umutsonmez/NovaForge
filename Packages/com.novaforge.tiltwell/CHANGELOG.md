@@ -12,6 +12,12 @@
   - Recipe bar on the gameplay screen up to tier 4 (and the brown world); tapping it opens the guide.
   - Free direction arrow on level 1 and on the first mixing level.
   - New types: `RecipeRow`, `ColorRecipes`.
+- Special floors:
+  - Sticky `~`, one-way arrows `^v<>` and paint pads `123`, handled in `Rules`, `Solver` and `CanStillSolve`.
+  - World 6 sticky, 8 arrows, 9 paint pads, 10 all of them. Tiers 6-10 were regenerated.
+  - `BoardView` draws the new floors and recolors painted drops.
+  - A one-line hint appears on the first level that uses each floor.
+- Fix: the hint arrow no longer carries over to the next level.
 - Sound: `TiltwellSoundBuilder` synthesizes 10 effects and a seamless music loop into `Runtime/Audio`, plus the `AudioLibrary`. Gameplay plays slide, bump, merge, deliver and fall sounds. `BoardView.Animate` takes a `landed` callback. Haptics fire on landing.
 
 ### Changed
