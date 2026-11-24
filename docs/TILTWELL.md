@@ -29,7 +29,7 @@ Sahne elle yapılmaz; builder koddan üretir (`Assets/Tiltwell/Tiltwell.unity`) 
 - Sonuç, günlük ödül, mağaza, ayarlar Core'un temalı ekranları (konfeti, sırayla yıldız).
 
 ## Bölümler
-`Runtime/Levels/levels.json`: 36 bölüm, 5 kademe, seed `20261123`. Her bölüm BFS solver ile çözülebilirliği ve par değeri doğrulanmış olarak üretilir:
+`Runtime/Levels/levels.json`: 92 bölüm, 10 kademe (dünya), seed `20261123`. Kademe 6+ sonradan eklendi; ilk 36 bölüm aynı kalır (kayıtlı ilerleme bozulmaz). Kademe 7'den itibaren kahverengi kuyular var (üç ana rengin hepsi gerekir). Her bölüm BFS solver ile çözülebilirliği ve par değeri doğrulanmış olarak üretilir:
 ```
 cd tools/dotnet/TiltwellGen && dotnet run -c Release -- 20261123 ../../../Packages/com.novaforge.tiltwell/Runtime/Levels/levels.json
 ```

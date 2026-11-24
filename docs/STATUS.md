@@ -32,7 +32,7 @@ Testler: EditMode 118/118, PlayMode 8/8, dotnet 118/118. Android + iOS **player 
 Cihazda henüz çalıştırılmadı: titreşim, gerçek reklam, gerçek ses çıkışı.
 
 ## Faz 7 — Referans oyun Tiltwell ✅ oynanabilir (editörde doğrulandı)
-Detay: [TILTWELL.md](TILTWELL.md). 36 solver-doğrulamalı bölüm, ana menü, bölüm seçimi, oyun ekranı (swipe, geri al, yeniden başlat, ipucu,
+Detay: [TILTWELL.md](TILTWELL.md). 92 solver-doğrulamalı bölüm (10 dünya), ana menü, bölüm seçimi, oyun ekranı (swipe, geri al, yeniden başlat, ipucu,
 ekstra hamle reklamı), sonuç/günlük ödül/mağaza/ayarlar Core ekranlarından. Sahne builder ile üretiliyor.
 Testler: EditMode 141/141, PlayMode 10/10 (uçtan uca bölüm çözme dahil), dotnet 118 + 22. Android + iOS player derlemesi temiz.
 Görsel yenileme (2026-11-24): `UITheme` + Nunito/Material Icons, kabarık butonlar, yol haritası, yeni oyun ekranı. Editörde render edilip kontrol edildi.

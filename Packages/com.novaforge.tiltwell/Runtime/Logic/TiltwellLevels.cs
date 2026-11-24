@@ -41,6 +41,8 @@ namespace NovaForge.Tiltwell
         public int MinWells, MaxWells;
         /// <summary>How many wells need a mixed (secondary) color.</summary>
         public int MinMixedWells, MaxMixedWells;
+        /// <summary>How many wells need brown (all three primaries). 0 keeps the random sequence of older tiers unchanged.</summary>
+        public int MinBrownWells, MaxBrownWells;
         /// <summary>Droplets that are not needed for any well (they get in the way).</summary>
         public int MaxDistractors;
         public int MaxHoles;
@@ -64,6 +66,12 @@ namespace NovaForge.Tiltwell
             new TierSpec { Tier = 3, Count = 8, MinSize = 6, MaxSize = 7, MinWells = 2, MaxWells = 2, MinMixedWells = 1, MaxMixedWells = 1, MaxDistractors = 1, MaxHoles = 1, WallDensity = 0.14f, MinPar = 4, MaxPar = 7 },
             new TierSpec { Tier = 4, Count = 8, MinSize = 7, MaxSize = 7, MinWells = 2, MaxWells = 3, MinMixedWells = 1, MaxMixedWells = 2, MaxDistractors = 1, MaxHoles = 2, WallDensity = 0.15f, MinPar = 6, MaxPar = 9 },
             new TierSpec { Tier = 5, Count = 8, MinSize = 7, MaxSize = 8, MinWells = 3, MaxWells = 3, MinMixedWells = 2, MaxMixedWells = 3, MaxDistractors = 1, MaxHoles = 2, WallDensity = 0.16f, MinPar = 8, MaxPar = 12 },
+            // Tiers 6+ were appended later. Earlier tiers must stay untouched so shipped level ids keep their layouts.
+            new TierSpec { Tier = 6, Count = 10, MinSize = 7, MaxSize = 8, MinWells = 3, MaxWells = 3, MinMixedWells = 2, MaxMixedWells = 3, MaxDistractors = 2, MaxHoles = 3, WallDensity = 0.16f, MinPar = 9, MaxPar = 12 },
+            new TierSpec { Tier = 7, Count = 10, MinSize = 6, MaxSize = 7, MinWells = 1, MaxWells = 2, MinBrownWells = 1, MaxBrownWells = 1, MinMixedWells = 0, MaxMixedWells = 1, MaxDistractors = 1, MaxHoles = 2, WallDensity = 0.14f, MinPar = 10, MaxPar = 13 },
+            new TierSpec { Tier = 8, Count = 12, MinSize = 7, MaxSize = 8, MinWells = 2, MaxWells = 3, MinBrownWells = 1, MaxBrownWells = 1, MinMixedWells = 1, MaxMixedWells = 2, MaxDistractors = 1, MaxHoles = 2, WallDensity = 0.15f, MinPar = 11, MaxPar = 14 },
+            new TierSpec { Tier = 9, Count = 12, MinSize = 8, MaxSize = 8, MinWells = 3, MaxWells = 3, MinBrownWells = 0, MaxBrownWells = 1, MinMixedWells = 2, MaxMixedWells = 3, MaxDistractors = 2, MaxHoles = 3, WallDensity = 0.16f, MinPar = 12, MaxPar = 15 },
+            new TierSpec { Tier = 10, Count = 12, MinSize = 8, MaxSize = 9, MinWells = 3, MaxWells = 4, MinBrownWells = 1, MaxBrownWells = 1, MinMixedWells = 1, MaxMixedWells = 3, MaxDistractors = 2, MaxHoles = 3, WallDensity = 0.17f, MinPar = 13, MaxPar = 16 },
         };
 
         public static LevelPack Generate(int seed, IReadOnlyList<TierSpec> tiers = null, int maxAttemptsPerLevel = 20_000)
@@ -152,11 +160,18 @@ namespace NovaForge.Tiltwell
 
             int wells = rng.Next(t.MinWells, t.MaxWells + 1);
             int mixed = Math.Min(wells, rng.Next(t.MinMixedWells, t.MaxMixedWells + 1));
+            // Only draw from the rng when the tier uses brown, so older tiers generate exactly as before.
+            int brown = t.MaxBrownWells > 0 ? Math.Min(wells, rng.Next(t.MinBrownWells, t.MaxBrownWells + 1)) : 0;
             var dropColors = new List<Paint>();
             for (int i = 0; i < wells; i++)
             {
                 Paint color;
-                if (i < mixed)
+                if (i < brown)
+                {
+                    color = Paint.Brown;
+                    dropColors.AddRange(Primaries);
+                }
+                else if (i - brown < mixed)
                 {
                     color = Mixed[rng.Next(Mixed.Length)];
                     foreach (var p in Primaries) if ((color & p) != 0) dropColors.Add(p); // needs two primaries
@@ -172,6 +187,7 @@ namespace NovaForge.Tiltwell
 
             int distractors = t.MaxDistractors > 0 ? rng.Next(0, t.MaxDistractors + 1) : 0;
             for (int i = 0; i < distractors; i++) dropColors.Add(Primaries[rng.Next(Primaries.Length)]);
+            if (free.Count < dropColors.Count) return null;
             foreach (var c in dropColors)
             {
                 var (x, y) = Take();

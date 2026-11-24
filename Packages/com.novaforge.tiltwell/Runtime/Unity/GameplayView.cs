@@ -75,7 +75,10 @@ namespace NovaForge.Tiltwell.Unity
             board.Build(_session.Board, _session.State);
             int index = Core.Progression.Catalog.IndexOf(levelId);
             levelLabel.text = Core.Localization.Format(TiltwellStrings.LevelN, index + 1);
-            ShowMessage(index == 0 ? TiltwellStrings.Tutorial : level.Tier == 2 && IsFirstOfTier(app, level) ? TiltwellStrings.TutorialMix : null);
+            ShowMessage(index == 0 ? TiltwellStrings.Tutorial
+                : level.Tier == 2 && IsFirstOfTier(app, level) ? TiltwellStrings.TutorialMix
+                : IsFirstBrownLevel(app, level) ? TiltwellStrings.TutorialBrown
+                : null);
             _balanceSub = Core.Events.Subscribe<BalanceChanged>(_ => RefreshHud());
             RefreshHud();
         }
@@ -88,6 +91,15 @@ namespace NovaForge.Tiltwell.Unity
 
         private static bool IsFirstOfTier(TiltwellApp app, LevelData level) =>
             app.Levels.Find(l => l.Tier == level.Tier) == level;
+
+        private static bool HasBrownWell(LevelData level)
+        {
+            foreach (var row in level.Rows) if (row.IndexOf('k') >= 0) return true;
+            return false;
+        }
+
+        private static bool IsFirstBrownLevel(TiltwellApp app, LevelData level) =>
+            HasBrownWell(level) && app.Levels.Find(HasBrownWell) == level;
 
         public override bool HandleBack()
         {

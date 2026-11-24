@@ -23,13 +23,14 @@ namespace NovaForge.Tiltwell.Unity
         public const string TutorialMix = "tiltwell.tutorial_mix";
         public const string AllDone = "tiltwell.all_done";
         public const string WorldN = "tiltwell.world_n";
+        public const string TutorialBrown = "tiltwell.tutorial_brown";
 
         private static readonly string[] Keys =
         {
             Title, Play, PlayLevel, Levels, LevelN, Moves, Undo, Restart, Hint, Stuck, NoHints, OutOfMovesTitle,
             ExtraMovesOffer, Tutorial, TutorialMix, AllDone,
             "resource.coin", "resource.hint", "shop.hints_3", "shop.hints_10",
-            WorldN,
+            WorldN, TutorialBrown,
         };
 
         private static readonly Dictionary<string, string[]> Values = new Dictionary<string, string[]>
@@ -44,6 +45,7 @@ namespace NovaForge.Tiltwell.Unity
                 "You finished every level!",
                 "Coins", "Hints", "3 Hints", "10 Hints",
                 "World {0}",
+                "Brown wells need all three colors: red, yellow and blue.",
             },
             [Languages.Turkish] = new[]
             {
@@ -55,6 +57,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Bütün bölümleri bitirdin!",
                 "Altın", "İpucu", "3 İpucu", "10 İpucu",
                 "Dünya {0}",
+                "Kahverengi kuyu üç rengin hepsini ister: kırmızı, sarı ve mavi.",
             },
             [Languages.German] = new[]
             {
@@ -66,6 +69,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Du hast alle Level geschafft!",
                 "Münzen", "Tipps", "3 Tipps", "10 Tipps",
                 "Welt {0}",
+                "Braune Brunnen brauchen alle drei Farben: Rot, Gelb und Blau.",
             },
             [Languages.French] = new[]
             {
@@ -77,6 +81,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Vous avez terminé tous les niveaux !",
                 "Pièces", "Indices", "3 indices", "10 indices",
                 "Monde {0}",
+                "Les puits bruns demandent les trois couleurs : rouge, jaune et bleu.",
             },
             [Languages.Spanish] = new[]
             {
@@ -88,6 +93,7 @@ namespace NovaForge.Tiltwell.Unity
                 "¡Has completado todos los niveles!",
                 "Monedas", "Pistas", "3 pistas", "10 pistas",
                 "Mundo {0}",
+                "Los pozos marrones necesitan los tres colores: rojo, amarillo y azul.",
             },
             [Languages.Portuguese] = new[]
             {
@@ -99,6 +105,7 @@ namespace NovaForge.Tiltwell.Unity
                 "Você concluiu todas as fases!",
                 "Moedas", "Dicas", "3 dicas", "10 dicas",
                 "Mundo {0}",
+                "Poços marrons precisam das três cores: vermelho, amarelo e azul.",
             },
             [Languages.Japanese] = new[]
             {
@@ -110,6 +117,7 @@ namespace NovaForge.Tiltwell.Unity
                 "全レベルクリア！",
                 "コイン", "ヒント", "ヒント3個", "ヒント10個",
                 "ワールド {0}",
+                "茶色の井戸には赤・黄・青の3色すべてが必要です。",
             },
             [Languages.Korean] = new[]
             {
@@ -121,6 +129,7 @@ namespace NovaForge.Tiltwell.Unity
                 "모든 레벨을 완료했습니다!",
                 "코인", "힌트", "힌트 3개", "힌트 10개",
                 "월드 {0}",
+                "갈색 우물에는 빨강, 노랑, 파랑 세 가지 색이 모두 필요합니다.",
             },
         };
 

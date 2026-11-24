@@ -5,6 +5,8 @@
 - `LevelMapView` + `LevelMapNode`: winding road level map, one colored world per tier, gold progress path, current-level marker; replaces `LevelSelectView`.
 - New main menu (chips, logo, decorative mini board, nav buttons, daily reward button) and gameplay HUD (chips, badge, message bubble).
 - `tiltwell.world_n` string in 8 languages.
+- Tiers 6-10: 56 new levels (92 total). Brown wells (need red, yellow and blue) from tier 7, with a `tiltwell.tutorial_brown` hint on the first one. The first 36 levels are unchanged.
+- Level map colors for worlds 6-10.
 
 ### Changed
 - `BoardView`: themed board (panel, raised walls, deep holes, glowing wells, glossy droplets, squash while sliding, particles on merge/deliver). Sprites come from the theme.
